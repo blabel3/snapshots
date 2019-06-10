@@ -22,6 +22,8 @@ frameworkVersion: "=1.44.1"
 provider:
   name: aws
   runtime: nodejs10.x
+  memorysize: 512
+  #iamRoleStatements #Permissions for all the functions set here.
 
 # you can overwrite defaults here
 #  stage: dev
@@ -43,6 +45,11 @@ provider:
 #            - "Ref" : "ServerlessDeploymentBucket"
 #            - "/*"
 
+layers:
+  webstuff:
+    path: node_modules
+    description: all the node modules we need for accessing the web to make deployments faster. 
+
 # you can define service wide environment variables here
 #  environment:
 #    variable1: value1
@@ -57,8 +64,14 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
+  screenshot:
+    handler: handler.screenshot
+    layers:
+      - {Ref: WebstuffLambdaLayer}
+  archiveFiles:
+    handler: handler.archiveFiles
+    layers:
+      - {Ref: WebstuffLambdaLayer}
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
