@@ -1,6 +1,6 @@
 'use strict';
 const puppeteer = require('puppeteer');
-const sites = require("./sites.json");
+const sites = require('./sites');
 
 
 module.exports.screenshot = async (event) => {
@@ -12,6 +12,7 @@ module.exports.screenshot = async (event) => {
     let filename = 'example' + i + '.png'
     await page.goto(sites[i]);
     await page.screenshot({path: filename, fullPage: true});
+    process.stdout.write(`${i}... `);
   }
 
   await browser.close();

@@ -11,7 +11,7 @@
     "mocha": "^6.1.4"
   },
   "scripts": {
-    "test": "testaroo!!"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
