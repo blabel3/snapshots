@@ -1,0 +1,29 @@
+{
+  "name": "snapshot-service",
+  "version": "0.1.0",
+  "description": "Takes automated snapshots of a website",
+  "main": "handler.js",
+  "dependencies": {
+    "aws-sdk": "^2.472.0",
+    "puppeteer": "^1.17.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "testaroo!!"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.dowjones.net:abelb/snapshot-service.git"
+  },
+  "keywords": [
+    "snapshot",
+    "screenshot",
+    "aws",
+    "lambda",
+    "s3",
+    "backup",
+    "archive"
+  ],
+  "author": "Blake Abel",
+  "license": "ISC"
+}
