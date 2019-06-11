@@ -1,8 +1,29 @@
 const puppeteer = require('puppeteer');
 const sites = require('./../sites');
 
- 
-module.exports.screenCapture = (async () => {
+let goToSites = async () => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+    
+  process.stdout.write('      ');
+  for(i = 0; i < sites.length; i++){
+    process.stdout.write(`Site ${i}... `);
+    try { 
+      await page.goto(sites[i]);
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  console.log();
+
+  await browser.close();
+
+  return true;
+}
+
+let screenCapture = async () => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   
@@ -12,5 +33,9 @@ module.exports.screenCapture = (async () => {
   await browser.close();
 
   return data;
-})();
+}
 
+module.exports.goToSites = goToSites;
+
+module.exports.screenCapture = screenCapture;
+ 

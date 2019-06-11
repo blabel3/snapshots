@@ -4,14 +4,15 @@ const control = require('./control');
 
 describe('Screenshots', function() {
     describe('Takes screenshot', function(){
-        /*it('should reach all of the websites in sites.json', async function() {
-            let reachable = await screenshots.goToSites;
+        it('can reach all of the websites in sites.json', async function() {
+            this.timeout(0); //Perhaps adjust after we know a ballpark for the sites/
+            let reachable = await screenshots.goToSites();
             assert.equal(reachable, control.reachable);
-        });*/
+        });
         
-        it('should get the same data as the control screenshot here', async function() {
-            let screenshot = await screenshots.screenCapture;
+        it('can take a screenshot of a webpage', async function() {
+            let screenshot = await screenshots.screenCapture();
             assert.equal(screenshot, control.screenshot);
         });
-    })
-})
+    });
+});
