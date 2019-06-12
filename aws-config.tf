@@ -51,8 +51,8 @@ resource "aws_lambda_function" "take_snapshot" {
 
     environment {
         variables = {
-            saveBucket = "buckett",
-            fetchBucket = " bucketa"
+            SAVE_BUCKET = "snapshot-bucket",
+            FETCH_BUCKET = " djcs-wsjlite-nonprod"
         }
     }
 
