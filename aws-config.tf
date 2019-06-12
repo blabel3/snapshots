@@ -7,11 +7,7 @@ provider "aws" {
     # $ terraform plan
 }
 
-resource "aws_instance" "example" {
-    ami = "ami-2757f631"
-    instance_type = "t2.micro"
-}
-
+#Setup for lambda function
 data "aws_iam_role" "iam_for_snapshot_lambda" {
     name = "iam_for_snapshot_lambda"
     assume_role_policy = <<EOF
@@ -48,6 +44,8 @@ resource "aws_lambda_function" "take_snapshot" {
     handler = "index.handler"
     source_code_hash = "${filebase64sha256("function.zip")}"
     runtime = "nodejs8.10"
+    publish = "true"
+    timeout = "600" # Ten minutes
 
     layers = ["${aws_lambda_layer_version.modules.arn}"]
 
@@ -58,7 +56,24 @@ resource "aws_lambda_function" "take_snapshot" {
         }
     }
 
-    publish = "true"
-    timeout = "600" # Ten minutes
+    #TODO: Clean up tags  
+    tags = {
+        Name = "Snapshot Function"
+        Environment = "dev"
+    }
 }
 
+# TODO: Create cloudwatch stuff to run lambda automatically
+
+# Storage configuration
+resource "aws_s3_bucket" "save-bucket" {
+    bucket = "snapshot-bucket"
+    acl = "private"
+
+    tags = {
+        Name = "Snapshot Bucket"
+        Environment = "Dev"
+    }
+}
+
+# No fetch-bucket definition because it already exists! It was made for the website duh. 
