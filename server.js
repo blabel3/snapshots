@@ -31,8 +31,8 @@ app.get('/_health', (req, res) => {
 })
 
 
-// TODO: Change this to be good with express!
-module.exports.handler = async (event) => {
+// TODO: Work with express better!
+app.get('/', (req, res) => {
 
   //Takes screenshot
   const browser = await puppeteer.launch();
@@ -96,8 +96,9 @@ module.exports.handler = async (event) => {
 
   }
 
-};
+})
 
+//Binding to servo specified port
 app.listen(PORT, () => {
   logger.info(`Snapshot-Service listening on port ${PORT}...`);
 });
