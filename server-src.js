@@ -34,34 +34,44 @@ app.get('/_health', (req, res) => {
 // TODO: Work with express better!
 app.get('/', (req, res) => {
 
-  //Takes screenshot
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
+    //Takes screenshot
+    puppeteer.launch().then( browser => {
 
-  for(i = 0; i < sites.length; i++){
-    let filename = 'example' + i + '.png'
-    await page.goto(sites[i]);
-    let screenshot = await page.screenshot({fullPage: true});
-    process.stdout.write(`${i}... `);
-    
-    //Stores them in s3
-    let filename = "Barrons" + sites[i].substring(23) + "/screenshots"; // ex. Barrons/penta/screenshots
+      browser.newPage().then( page => {
 
-    let screenshotStoreParams = {
-      Body: screenshot,
-      Bucket: process.env.SAVE_BUCKET,
-      Key: filename
-    }
+        for(i = 0; i < sites.length; i++){
+          let filename = 'example' + i + '.png'
+          page.goto(sites[i]).then( screenshot => {
 
-    s3.putObject(screenshotStoreParams, function(error, data){
-      if (error) console.error(error); 
-      else {
-        console.log(data); //Will be stuff like the Etag and the versionID. 
-      }
-    })
-  }
+            let screenshot = await page.screenshot({fullPage: true});
+            process.stdout.write(`${i}... `);
+            
+            //Stores them in s3
+            let filename = "Barrons" + sites[i].substring(23) + "/screenshots"; // ex. Barrons/penta/screenshots
+      
+            let screenshotStoreParams = {
+              Body: screenshot,
+              Bucket: process.env.SAVE_BUCKET,
+              Key: filename
+            }
+      
+            s3.putObject(screenshotStoreParams, function(error, data){
+              if (error) console.error(error); 
+              else {
+                console.log(data); //Will be stuff like the Etag and the versionID. 
+              }
+            })
 
-  await browser.close();
+          });
+
+        }
+
+      })
+
+      browser.close();
+
+    });
+
 
   //Gets CSS/HTML/JS 
 

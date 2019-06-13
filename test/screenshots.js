@@ -24,13 +24,26 @@ let goToSites = async () => {
 }
 
 let screenCapture = async () => {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  
-  await page.goto("https://example.com");
-  var data = await page.screenshot({encoding: 'base64', fullPage: true});
 
-  await browser.close();
+  var data;
+
+  //Takes screenshot
+  puppeteer.launch().then( browser => {
+
+    browser.newPage().then( page => {
+
+      page.goto("https://example.com").then( () => {
+
+        page.screenshot({encoding: 'base64', fullPage: true}).then( screenshot => {
+          data = screenshot;
+        });
+
+      });
+
+    })
+    browser.close().then();
+
+  });
 
   return data;
 }
