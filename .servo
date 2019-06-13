@@ -1,0 +1,15 @@
+{
+    "platform": "nodejs",
+    "tags": {
+        "default": {
+            "owner": "blake.abel@dowjones.com",
+            "bu": "djcs",
+            "product": "barrons",
+            "component": "web",
+            "environment": "dev"
+        },
+        "production": {
+            "environment": "prod"
+        }
+    }
+}
