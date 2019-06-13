@@ -2,9 +2,10 @@
   "name": "snapshot-service",
   "version": "0.1.0",
   "description": "Takes automated snapshots of a website",
-  "main": "handler.js",
+  "main": "index.js",
   "dependencies": {
     "aws-sdk": "^2.472.0",
+    "express": "^4.17.1",
     "puppeteer": "^1.17.0"
   },
   "devDependencies": {
