@@ -1,9 +1,16 @@
 'use strict';
 
-const puppeteer = require('puppeteer');
-const aws = require('aws-sdk');
+//Internal dependencies
 const sites = require('./sites');
 const files = require('./files');
+
+//External dependencies
+const puppeteer = require('puppeteer');
+const aws = require('aws-sdk');
+const express = require('express');
+
+//Initilization
+const app = express();
 
 //Set up all AWS services we need to access from here
 let s3 = new aws.S3({
@@ -13,6 +20,18 @@ let s3 = new aws.S3({
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
 
+//Servo required health check
+app.get('/_health', (req, res) => {
+  console.log('GET /_health 200');
+  res.status(200).json({
+    status: 'OK',
+    app: 'snapshot-service',
+    commit: process.env.SERVO_COMMIT
+  })
+})
+
+
+// TODO: Change this to be good with express!
 module.exports.handler = async (event) => {
 
   //Takes screenshot
@@ -78,3 +97,7 @@ module.exports.handler = async (event) => {
   }
 
 };
+
+app.listen(PORT, () => {
+  logger.info(`Snapshot-Service listening on port ${PORT}...`);
+});
