@@ -1,4 +1,4 @@
-//TODO: Add unit test for file grabbing code. 
+/*TODO: Add unit test for file grabbing code. 
 const aws = require('aws-sdk');
 
 let goToFiles = async () => {
@@ -34,3 +34,4 @@ let goToFiles = async () => {
 
     return true;
 }
+*/
