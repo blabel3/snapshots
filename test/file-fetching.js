@@ -1,7 +1,7 @@
 //TODO: Add unit test for file grabbing code. 
 const aws = require('aws-sdk');
 
-async () => {
+let goToFiles = async () => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
         
@@ -33,4 +33,4 @@ async () => {
     await browser.close();
 
     return true;
-}();
+}
