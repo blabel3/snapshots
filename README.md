@@ -1,6 +1,6 @@
 # snapshot-service
 
-This is an AWS lambda service set up with [serverless](https://serverless.com) that takes a snapshot of all the sites that we want for archiving and comparing later. A snapshot includes screenshots of the site, but also a copy of the HTML, CSS, and JS that was used to generate it.
+This is an AWS lambda service that takes a snapshot of all the sites that we want for archiving and comparing later. A snapshot includes screenshots of the site, but also a copy of the HTML, CSS, and JS that was used to generate it.
 
 ## Automated Snapshot Page List
 
