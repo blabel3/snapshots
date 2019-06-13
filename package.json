@@ -13,7 +13,7 @@
     "s3rver": "^3.2.0"
   },
   "scripts": {
-    "test": "echo hi"
+    "test": "node -v"
   },
   "repository": {
     "type": "git",
