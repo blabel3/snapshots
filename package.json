@@ -9,11 +9,18 @@
     "puppeteer": "^1.17.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-transform-async-to-generator": "^7.4.4",
     "mocha": "^6.1.4",
     "s3rver": "^3.2.0"
   },
+  "engines": {
+    "node": ">=7.6.0"
+  },
   "scripts": {
-    "test": "node -v"
+    "build": "babel src/ -d .",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
