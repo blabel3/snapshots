@@ -4,7 +4,7 @@ ls
 
 ldd chrome | grep not
 
-sudo yum install cups-libs dbus-glib libXrandr libXcursor libXinerama cairo cairo-gobject pango
+sudo yum -y install cups-libs dbus-glib libXrandr libXcursor libXinerama cairo cairo-gobject pango
 
 ldd chrome | grep not
 
