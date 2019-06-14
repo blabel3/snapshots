@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "babel src/ -d .",
-    "test": "ldd chrome | grep not && mocha"
+    "test": "cat /etc/os-release && mocha"
   },
   "repository": {
     "type": "git",
