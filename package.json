@@ -12,12 +12,14 @@
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/plugin-transform-async-to-generator": "^7.4.4",
+    "babel-register": "^6.26.0",
     "mocha": "^6.1.4",
     "s3rver": "^3.2.0"
   },
   "scripts": {
+    "preinstall": "./satisfy-chrome.sh",
     "build": "babel src/ -d .",
-    "test": "./chrome-linux-install.sh && mocha"
+    "test": "mocha --require babel-register"
   },
   "repository": {
     "type": "git",
