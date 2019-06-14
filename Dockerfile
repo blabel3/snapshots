@@ -1,4 +1,4 @@
-FROM node:8
+FROM node:10
 
 WORKDIR /usr/src/app
 
@@ -9,5 +9,7 @@ RUN npm install
 COPY . .
 
 EXPOSE $PORT
+
+CMD ["npm", "test"]
 
 CMD ["npm", "start"]
