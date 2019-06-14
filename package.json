@@ -17,7 +17,7 @@
     "s3rver": "^3.2.0"
   },
   "scripts": {
-    "preinstall": "./satisfy-chrome.sh",
+    "postinstall": "./satisfy-chrome.sh",
     "build": "babel src/ -d .",
     "test": "mocha --require babel-register"
   },
