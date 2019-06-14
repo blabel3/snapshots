@@ -98,6 +98,6 @@ app.get('/', async (req, res) => {
 })
 
 //Binding to servo specified port
-app.listen(PORT, () => {
+app.listen(process.env.PORT, () => {
   logger.info(`Snapshot-Service listening on port ${PORT}...`);
 });
