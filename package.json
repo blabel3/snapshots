@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "babel src/ -d .",
-    "test": "cat /etc/os-release && mocha"
+    "test": "./chrome-linux-install.sh && mocha"
   },
   "repository": {
     "type": "git",
