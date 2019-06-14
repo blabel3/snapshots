@@ -19,7 +19,7 @@
   "scripts": {
     "postinstall": "./satisfy-chrome.sh",
     "build": "babel src/ -d .",
-    "test": "mocha --compilers js:@babel/register"
+    "test": "mocha --require @babel/register"
   },
   "repository": {
     "type": "git",

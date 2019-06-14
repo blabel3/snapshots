@@ -38,7 +38,7 @@ app.get('/', async (req, res) => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  for(i = 0; i < sites.length; i++){
+  for(let i = 0; i < sites.length; i++){
     await page.goto(sites[i]);
     let screenshot = await page.screenshot({fullPage: true});
     process.stdout.write(`${i}... `);
@@ -98,6 +98,6 @@ app.get('/', async (req, res) => {
 })
 
 //Binding to servo specified port
-app.listen(PORT, () => {
-  logger.info(`Snapshot-Service listening on port ${PORT}...`);
+app.listen(process.env.PORT, () => {
+  console.log(`Snapshot-Service listening on port ${process.env.PORT}...`);
 });
