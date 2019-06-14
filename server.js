@@ -43,7 +43,7 @@ function () {
     const browser = yield puppeteer.launch();
     const page = yield browser.newPage();
 
-    for (i = 0; i < sites.length; i++) {
+    for (let i = 0; i < sites.length; i++) {
       yield page.goto(sites[i]);
       let screenshot = yield page.screenshot({
         fullPage: true

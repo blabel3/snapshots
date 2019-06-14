@@ -4,7 +4,7 @@ ls
 
 ldd chrome | grep not
 
-sudo yum -y install cups-libs dbus-glib libXrandr libXcursor libXinerama cairo cairo-gobject pango gtk3 gdk-pixbuf2 atk at-spi2-core at-spi2-atk alsa-lib  libXcomposite libXi libXtst libXScrnSaver 
+sudo yum -y install cups-libs dbus-glib libXrandr libXcursor libXinerama cairo cairo-gobject pango alsa-lib  libXcomposite libXi libXtst libXss libatk libatk-bridge libatspi libgtk libgdk libgdk_pixbuf
 
 ldd chrome | grep not
 
