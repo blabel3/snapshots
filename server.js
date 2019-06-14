@@ -96,6 +96,6 @@ function () {
   };
 }()); //Binding to servo specified port
 
-app.listen(PORT, () => {
-  logger.info(`Snapshot-Service listening on port ${PORT}...`);
+app.listen(process.env.PORT, () => {
+  console.log(`Snapshot-Service listening on port ${process.env.PORT}...`);
 });
