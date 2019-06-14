@@ -12,14 +12,14 @@
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/plugin-transform-async-to-generator": "^7.4.4",
-    "babel-register": "^6.26.0",
+    "@babel/register": "^7.4.4",
     "mocha": "^6.1.4",
     "s3rver": "^3.2.0"
   },
   "scripts": {
     "postinstall": "./satisfy-chrome.sh",
     "build": "babel src/ -d .",
-    "test": "mocha --require babel-register"
+    "test": "mocha --compilers js:@babel/register"
   },
   "repository": {
     "type": "git",
