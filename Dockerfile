@@ -1,7 +1,5 @@
 FROM node:10
 
-WORKDIR /usr/src/app
-
 COPY package*.json ./
 
 # Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
@@ -42,6 +40,10 @@ EXPOSE $PORT
 
 # Run everything after as non-privileged user.
 USER pptruser
+
+CMD ["google-chrome-unstable"]
+
+CMD ["npm", "install"]
 
 CMD ["npm", "test"]
 
