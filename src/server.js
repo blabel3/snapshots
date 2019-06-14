@@ -35,7 +35,7 @@ app.get('/_health', (req, res) => {
 app.get('/', async (req, res) => {
 
   //Takes screenshot
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
   const page = await browser.newPage();
 
   for(let i = 0; i < sites.length; i++){
