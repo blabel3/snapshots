@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:10-slim
 
 COPY package*.json ./
 
@@ -43,10 +43,4 @@ EXPOSE $PORT
 # Run everything after as non-privileged user.
 USER pptruser
 
-CMD ["google-chrome-unstable"]
-
-CMD ["npm", "install"]
-
-CMD ["npm", "test"]
-
-CMD ["npm", "start"]
+CMD ["sh", "/launch.sh"]
