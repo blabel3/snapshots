@@ -1,6 +1,9 @@
+//Internal dependencies
 const screenshots = require('./screenshots');
+const control = require('../data/test-constants');
+
+//External dependencies
 const assert = require('assert');
-const control = require('./control');
 
 describe('Screenshots', function() {
     describe('Takes screenshot', function(){

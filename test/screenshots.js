@@ -1,5 +1,7 @@
+//Internal dependencies
+const sites = require('../data/sites');
+//external dependencies
 const puppeteer = require('puppeteer');
-const sites = require('./../sites');
 
 let goToSites = async () => {
   const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});

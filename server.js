@@ -1,8 +1,8 @@
 'use strict';
 
 //Internal dependencies
-const sites = require('./sites');
-const files = require('./files');
+const sites = require('./data/sites');
+const files = require('./data/files');
 
 //External dependencies
 const puppeteer = require('puppeteer');
