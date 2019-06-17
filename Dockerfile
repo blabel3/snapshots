@@ -45,4 +45,4 @@ EXPOSE $PORT
 # Run everything after as non-privileged user.
 #USER pptruser
 
-CMD ["sh", "/launch.sh"]
+CMD ["npm", "start"]

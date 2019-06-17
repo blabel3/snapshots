@@ -13,7 +13,8 @@
     "s3rver": "^3.2.0"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "prestart": "npm test"
   },
   "repository": {
     "type": "git",
