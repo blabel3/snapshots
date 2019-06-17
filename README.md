@@ -9,3 +9,20 @@ None *yet*!
 ## Manual snapshot generation
 
 Details on how to force a snapshot to be generated and how to do it on other pages. 
+
+## Running locally
+
+Clone the repository
+
+Run npm install
+
+* If you're on windows/linux you will have to install additional software to get puppeteer to work correctly. You can also just use docker on your own computer.
+
+Edit /etc/hosts to add in this entry:
+```
+127.0.0.1   test-bucket.localhost
+```
+
+Run npm run local to start a local fake s3 server (with s3rver)
+
+RUn npm start to start the snapshot service, and go to localhost:8080 to trigger the storage!

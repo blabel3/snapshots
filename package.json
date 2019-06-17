@@ -14,7 +14,9 @@
   },
   "scripts": {
     "test": "mocha",
-    "prestart": "npm test"
+    "prestart": "npm test",
+    "local": "PORT=8080 LOCAL=true npm start",
+    "server": "s3rver -a 127.0.0.1 -p 4568 -d /tmp/s3rver --configure-bucket test-bucket.localhost"
   },
   "repository": {
     "type": "git",

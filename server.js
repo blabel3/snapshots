@@ -11,14 +11,23 @@ const express = require('express');
 
 //Initilization
 const app = express();
+const saveBucket = process.env.LOCAL ? "test-bucket" : process.env.SERVO_S3_BUCKET;
 
 //Set up all AWS services we need to access from here
-let s3 = new aws.S3({
+var config = {
   apiVersion: '2006-03-01', //latest as of 2019-06-13, but don't want to use latest in case anything changes.
   region: 'us-east-1', 
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-});
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID ? process.env.AWS_ACCESS_KEY_ID : 'S3RVER',
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ? process.env.AWS_SECRET_ACCESS_KEY : 'S3RVER'
+}
+
+if(process.env.LOCAL) config.endpoint = "http://localhost:4568";
+
+let s3 = new aws.S3(config);
+
+console.log(saveBucket);
+console.log(process.env.LOCAL);
+console.log(config);
 
 //Servo required health check
 app.get('/_health', (req, res) => {
@@ -42,14 +51,19 @@ app.get('/', async (req, res) => {
     await page.goto(sites[i]);
     let screenshot = await page.screenshot({fullPage: true});
     process.stdout.write(`${i}... `);
+
+    console.log(screenshot);
     
     //Stores them in s3
-    let filename = "Barrons" + sites[i].substring(23) + "/screenshots"; // ex. Barrons/penta/screenshots
+    var d = new Date();
+    var dateAppend = d.getUTCFullYear() + "/" + d.getUTCMonth() + "/" + d.getUTCDate();
+    let filename = "Barrons" + sites[i].substring(23) + "/screenshots/" + dateAppend + ".png"; // ex. Barrons/penta/screenshots
 
     let screenshotStoreParams = {
       Body: screenshot,
-      Bucket: process.env.SAVE_BUCKET,
-      Key: filename
+      Bucket: saveBucket,
+      Key: filename,
+      ContentType: "image/png"
     }
 
     s3.putObject(screenshotStoreParams, function(error, data){
@@ -64,7 +78,7 @@ app.get('/', async (req, res) => {
 
   //Gets CSS/HTML/JS 
 
-  for(let file in files){
+  /*for(let file in files){
 
     let fetchParams = {
       Bucket: process.env.FETCH_BUCKET,
@@ -79,7 +93,7 @@ app.get('/', async (req, res) => {
 
         let resourceStoreParams = {
           Body: resource,
-          Bucket: process.env.SAVE_BUCKET,
+          Bucket: saveBucket,
           Key: file //need to edit these?
         }
     
@@ -93,7 +107,7 @@ app.get('/', async (req, res) => {
       }
     })
 
-  }
+  }*/
 
 })
 
