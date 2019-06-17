@@ -32,14 +32,13 @@ app.get('/_health', (req, res) => {
 
 
 // TODO: Work with express better!
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
 
   //Takes screenshot
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
   const page = await browser.newPage();
 
-  for(i = 0; i < sites.length; i++){
-    let filename = 'example' + i + '.png'
+  for(let i = 0; i < sites.length; i++){
     await page.goto(sites[i]);
     let screenshot = await page.screenshot({fullPage: true});
     process.stdout.write(`${i}... `);
@@ -65,11 +64,11 @@ app.get('/', (req, res) => {
 
   //Gets CSS/HTML/JS 
 
-  for(let filename in files){
+  for(let file in files){
 
     let fetchParams = {
       Bucket: process.env.FETCH_BUCKET,
-      Key: filename
+      Key: file
     }
 
     s3.getObject(fetchParams, function(error, resource) {
@@ -81,7 +80,7 @@ app.get('/', (req, res) => {
         let resourceStoreParams = {
           Body: resource,
           Bucket: process.env.SAVE_BUCKET,
-          Key: filename //need to edit these?
+          Key: file //need to edit these?
         }
     
         s3.putObject(resourceStoreParams, function(error, data){
@@ -99,6 +98,6 @@ app.get('/', (req, res) => {
 })
 
 //Binding to servo specified port
-app.listen(PORT, () => {
-  logger.info(`Snapshot-Service listening on port ${PORT}...`);
+app.listen(process.env.PORT, () => {
+  console.log(`Snapshot-Service listening on port ${process.env.PORT}...`);
 });
