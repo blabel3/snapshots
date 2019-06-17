@@ -40,7 +40,9 @@ app.get('/',
 function () {
   var _ref = _asyncToGenerator(function* (req, res) {
     //Takes screenshot
-    const browser = yield puppeteer.launch();
+    const browser = yield puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     const page = yield browser.newPage();
 
     for (let i = 0; i < sites.length; i++) {

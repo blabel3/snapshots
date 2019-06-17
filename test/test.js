@@ -12,7 +12,12 @@ describe('Screenshots', function() {
         
         it('Takes a screenshot of a webpage', async function() {
             let screenshot = await screenshots.screenCapture();
-            assert.equal(screenshot, control.screenshot);
+            try { 
+                assert.equal(screenshot, control.screenshot2);
+            } catch (error) {
+                //try the other screenshot from inside the docker image
+                assert.equal(screenshot, control.screenshot);
+            }
         });
     });
     //TODO: Write tests for storage.
