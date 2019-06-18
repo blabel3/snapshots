@@ -14,11 +14,11 @@ const app = express();
 const saveBucket = process.env.LOCAL ? "test-bucket" : process.env.SERVO_S3_BUCKET;
 
 //Set up all AWS services we need to access from here
-var config = {
+let config = {
   apiVersion: '2006-03-01', //latest as of 2019-06-13, but don't want to use latest in case anything changes.
   region: 'us-east-1', 
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID ? process.env.AWS_ACCESS_KEY_ID : 'S3RVER',
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ? process.env.AWS_SECRET_ACCESS_KEY : 'S3RVER'
+  accessKeyId: process.env.SERVO_S3_KEY ? process.env.SERVO_S3_KEY : 'S3RVER',
+  secretAccessKey: process.env.SERVO_S3_SECRET_KEY ? process.env.SERVO_S3_SECRET_KEY : 'S3RVER'
 }
 
 if(process.env.LOCAL) config.endpoint = "http://localhost:4568";
@@ -42,6 +42,10 @@ app.get('/_health', (req, res) => {
 
 // TODO: Work with express better!
 app.get('/', async (req, res) => {
+
+  console.log(saveBucket);
+  console.log(process.env.LOCAL);
+  console.log(config);
 
   //Takes screenshot
   const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
@@ -78,7 +82,6 @@ app.get('/', async (req, res) => {
   await browser.close();
 
   res.send('<p>Done!</p>');
-
 
   //Gets CSS/HTML/JS 
 
