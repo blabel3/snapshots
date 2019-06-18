@@ -1,5 +1,6 @@
 //Internal dependencies
 const screenshots = require('./screenshots');
+const storage = require('./storage');
 const control = require('../data/test-constants');
 
 //External dependencies
@@ -25,20 +26,25 @@ describe('Screenshots', function() {
     });
     //TODO: Write tests for storage.
     describe('Stores screenshot', function(){
-        it('Accesses storage S3 bucket', function(){
+        before( (done) => {
+            storage.server.run(done); //start server
+        } )
 
+        it('Puts screenshots into storage S3 bucket', (done) => {
+            storage.putImageInBucket(control.screenshot2, done);
+            //Assertion is in the test function because yay callbacks.
         });
 
-        it('Uploads to storage S3 bucket', function() {
-
-        });
+        after( (done) => {
+            storage.server.close(done); //end server
+        })
     });
 });
 
 //TODO: Write tests for File getter.
 describe('Resources (HTML/CSS/JS)', function(){
     describe("Gets files from website's S3 bucket", function() {
-        it('Accesses S3 bucket', function(){
+        it('Website data S3 bucket is accessible', function(){
 
         });
 
@@ -47,11 +53,7 @@ describe('Resources (HTML/CSS/JS)', function(){
         });
     });
 
-    describe("Puts files into storage S3 bucket", function(){
-        it('Accesses storage S3 bucket', function(){
-
-        });
-
+    describe("Stores website files", function(){
         it('Puts files into storage S3 bucket', function(){
 
         });

@@ -72,9 +72,13 @@ app.get('/', async (req, res) => {
         console.log(data); //Will be stuff like the Etag and the versionID. 
       }
     })
+
   }
 
   await browser.close();
+
+  res.send('<p>Done!</p>');
+
 
   //Gets CSS/HTML/JS 
 

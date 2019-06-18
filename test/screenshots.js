@@ -38,6 +38,4 @@ let screenCapture = async () => {
 }
 
 module.exports.goToSites = goToSites;
-
 module.exports.screenCapture = screenCapture;
- 
