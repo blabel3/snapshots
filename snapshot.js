@@ -7,7 +7,7 @@ const aws = require('aws-sdk');
 const axios = require('axios');
 
 //Initilization 
-const saveBucket = process.env.LOCAL ? "test-bucket" : process.env.SERVO_S3_BUCKET;
+const saveBucket = process.env.SERVO_S3_BUCKET;
 const host = "https://www.barrons.com";
 
 let d = new Date();
@@ -17,10 +17,16 @@ let dateAppend = d.getUTCFullYear() + "/" + d.getUTCMonth() + "/" + d.getUTCDate
 let config = {
   apiVersion: '2006-03-01', //latest as of 2019-06-13, but don't want to use `latest~ in case anything changes.
   region: process.env.AWS_REGION ? process.env.AWS_REGION : 'us-east-1', 
-  accessKeyId: process.env.SERVO_S3_KEY ? process.env.SERVO_S3_KEY : 'S3RVER',
-  secretAccessKey: process.env.SERVO_S3_SECRET_KEY ? process.env.SERVO_S3_SECRET_KEY : 'S3RVER'
 }
-if(process.env.LOCAL) config.endpoint = "http://localhost:9001";
+
+//Setting stuff differently in order to run locally
+if(!process.env.SERVO_S3_BUCKET) {
+    config.endpoint = "http://localhost:9001";
+    config.accessKeyId = 'S3RVER';
+    config.secretAccessKey = 'S3RVER';
+    saveBucket = 'test-bucket';
+}
+
 let s3 = new aws.S3(config);
 
 //debugging
