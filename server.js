@@ -20,7 +20,7 @@ const host = "https://www.barrons.com";
 //Set up all AWS services we need to access from here
 let config = {
   apiVersion: '2006-03-01', //latest as of 2019-06-13, but don't want to use latest in case anything changes.
-  region: 'us-east-1', 
+  region: process.env.AWS_REGION ? process.env.AWS_REGION : 'us-east-1', 
   accessKeyId: process.env.SERVO_S3_KEY ? process.env.SERVO_S3_KEY : 'S3RVER',
   secretAccessKey: process.env.SERVO_S3_SECRET_KEY ? process.env.SERVO_S3_SECRET_KEY : 'S3RVER'
 }
