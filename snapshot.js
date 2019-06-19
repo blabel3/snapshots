@@ -8,6 +8,7 @@ const axios = require('axios');
 
 //Initilization 
 const saveBucket = process.env.SERVO_S3_BUCKET;
+const bucketPrefix = process.env.SERVO_S3_PREFIX;
 const host = "https://www.barrons.com";
 
 let d = new Date();
@@ -25,6 +26,7 @@ if(!process.env.SERVO_S3_BUCKET) {
     config.accessKeyId = 'S3RVER';
     config.secretAccessKey = 'S3RVER';
     saveBucket = 'test-bucket';
+    bucketPrefix = '';
 }
 
 let s3 = new aws.S3(config);
@@ -54,7 +56,7 @@ let browser = async () => {
         let screenshotStoreParams = {
             Body: screenshot,
             Bucket: saveBucket,
-            Key: filename,
+            Key: bucketPrefix + filename,
             ContentType: "image/png"
         }
 
@@ -109,6 +111,11 @@ let resources = () => {
         }
         })
     }
+
+    s3.listObjects( { Bucket: saveBucket }, (error, data) => {
+        if(error) console.error(error);
+        console.log(data);
+    })
 
     }).then(() => { console.log('Yay!') });
 }
