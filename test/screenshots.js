@@ -1,5 +1,5 @@
 //Internal dependencies
-const sites = require('../data/sites');
+const paths = require('../data/paths');
 //external dependencies
 const puppeteer = require('puppeteer');
 
@@ -8,10 +8,10 @@ let goToSites = async () => {
   const page = await browser.newPage();
     
   process.stdout.write('      ');
-  for(i = 0; i < sites.length; i++){
+  for(i = 0; i < paths.length; i++){
     process.stdout.write(`Site ${i}... `);
     try { 
-      await page.goto(sites[i]);
+      await page.goto("https://www.barrons.com" + paths[i]);
     } catch (error) {
       console.error(error);
       return false;
