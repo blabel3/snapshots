@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "aws-sdk": "^2.472.0",
+    "axios": "^0.19.0",
     "express": "^4.17.1",
     "puppeteer": "^1.17.0"
   },
@@ -16,7 +17,7 @@
     "test": "mocha",
     "prestart": "npm test",
     "local": "PORT=8080 LOCAL=true npm start",
-    "server": "s3rver -a 127.0.0.1 -p 4568 -d /tmp/s3rver --configure-bucket test-bucket.localhost"
+    "server": "s3rver -a 127.0.0.1 -p 9001 -d /tmp/s3rver --configure-bucket test-bucket.localhost"
   },
   "repository": {
     "type": "git",
