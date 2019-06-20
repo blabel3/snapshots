@@ -70,6 +70,11 @@ let browser = async () => {
 
     }
 
+    s3.listObjects( { Bucket: saveBucket }, (error, data) => {
+        if(error) console.error(error);
+        console.log(data);
+    })
+
     await browser.close();
 
 };
