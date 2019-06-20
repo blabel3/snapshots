@@ -8,7 +8,7 @@ const axios = require('axios');
 
 //Initilization 
 const saveBucket = process.env.SERVO_S3_BUCKET;
-const bucketPrefix = process.env.SERVO_S3_PREFIX;
+const bucketPrefix = process.env.SERVO_S3_KEY_PREFIX;
 const host = "https://www.barrons.com";
 
 let d = new Date();
