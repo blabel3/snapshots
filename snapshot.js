@@ -69,10 +69,10 @@ let browser = async () => {
 
     }
 
-    s3.listObjects( { Bucket: saveBucket }, (error, data) => {
+    /*s3.listObjects( { Bucket: saveBucket }, (error, data) => {
         if(error) console.error(error);
         console.log(data);
-    })
+    })*/
 
     await browser.close();
 
@@ -125,14 +125,14 @@ let resources = () => {
         })
     }
 
-    s3.listObjects( { Bucket: saveBucket }, (error, data) => {
+    /*s3.listObjects( { Bucket: saveBucket }, (error, data) => {
         if(error) console.error(error);
         console.log(data);
-    })
+    })*/
 
     }).then(() => { console.log('Yay!') });
 }
 
 browser().then( (result) => {
-    //resources();
+    resources();
 } );
