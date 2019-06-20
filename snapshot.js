@@ -82,6 +82,10 @@ let browser = async () => {
 let resources = () => {
     //Gets CSS/HTML/JS 
 
+    //debugging
+    console.log("SAVE BUCKET: " + saveBucket);
+    console.log("BUCKET PREFIX: " + bucketPrefix);
+
     let requests = [];
 
     //Set up all requests we need
@@ -107,9 +111,10 @@ let resources = () => {
         let key = bucketPrefix + filename;
 
         let resourceStoreParams = {
-        Body: responses[i].data,
-        Bucket: saveBucket,
-        Key:  key//need to edit these?
+            Body: responses[i].data,
+            Bucket: saveBucket,
+            Key:  key, 
+            ContentType: "text/html"
         }
 
         s3.putObject(resourceStoreParams, function(error, data){
@@ -129,5 +134,5 @@ let resources = () => {
 }
 
 browser().then( (result) => {
-    resources();
+    //resources();
 } );
