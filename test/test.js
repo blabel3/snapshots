@@ -8,7 +8,7 @@ const assert = require('assert');
 
 describe('Screenshots', function() {
     describe('Takes screenshot', function(){
-        it('Reaches all of the websites in sites.json', async function() {
+        it('Reaches all of the websites in paths.json', async function() {
             this.timeout(0); //Perhaps adjust after we know a ballpark for the sites instead of disabling
             let reachable = await screenshots.goToSites();
             assert.equal(reachable, control.reachable);
