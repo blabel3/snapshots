@@ -71,11 +71,6 @@ let browser = async () => {
 
     }
 
-    s3.listObjects( { Bucket: saveBucket, Marker: bucketPrefix }, (error, data) => {
-        if(error) console.error(error);
-        console.log(data);
-    })
-
     await browser.close();
 
 };
@@ -131,11 +126,6 @@ let resources = () => {
 
     }).then(() => { 
 
-        s3.listObjects( { Bucket: saveBucket, Marker: bucketPrefix }, (error, data) => {
-            if(error) console.error(error);
-            console.log(data);
-        })
-
         console.log('Yay!') 
     });
 }
@@ -143,3 +133,10 @@ let resources = () => {
 browser().then( (result) => {
     resources();
 } );
+
+module.exports.checkFiles = () => {
+    s3.listObjects( { Bucket: saveBucket, Marker: bucketPrefix }, (error, data) => {
+        if(error) console.error(error);
+        console.log(data);
+    })
+}
