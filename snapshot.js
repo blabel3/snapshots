@@ -7,8 +7,8 @@ const aws = require('aws-sdk');
 const axios = require('axios');
 
 //Initilization 
-const saveBucket = process.env.SERVO_S3_BUCKET;
-const bucketPrefix = process.env.SERVO_S3_KEY_PREFIX;
+let saveBucket = process.env.SERVO_S3_BUCKET;
+let bucketPrefix = process.env.SERVO_S3_KEY_PREFIX;
 const host = "https://www.barrons.com";
 
 let d = new Date();
@@ -96,7 +96,7 @@ let resources = () => {
     console.log(paths[i])
 
     let request = axios.get((host + paths[i]), {
-        headers: { 'CF-CACHE-TAG': process.env.CF_CACHE_TAG }
+        headers: { 'CF-CACHE-TAG': process.env.CF_CACHE_TAG ? process.env.CF_CACHE_TAG : 'test' }
     });
 
     requests.push(request);
@@ -129,12 +129,15 @@ let resources = () => {
         })
     }
 
-    s3.listObjects( { Bucket: saveBucket, Marker: bucketPrefix }, (error, data) => {
-        if(error) console.error(error);
-        console.log(data);
-    })
+    }).then(() => { 
 
-    }).then(() => { console.log('Yay!') });
+        s3.listObjects( { Bucket: saveBucket, Marker: bucketPrefix }, (error, data) => {
+            if(error) console.error(error);
+            console.log(data);
+        })
+
+        console.log('Yay!') 
+    });
 }
 
 browser().then( (result) => {
