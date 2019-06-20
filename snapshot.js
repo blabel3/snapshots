@@ -53,6 +53,8 @@ let browser = async () => {
         let filename = "Barrons/" + dateAppend + paths[i] + "screenshots/" + "shot" + ".png"; // ex. Barrons/penta/screenshots
         let key = bucketPrefix + filename;
 
+        console.log("SKEY: " + key);
+
         let screenshotStoreParams = {
             Body: screenshot,
             Bucket: saveBucket,
@@ -109,6 +111,8 @@ let resources = () => {
 
         let filename = "Barrons/" + dateAppend  + paths[i] + "resources/" + "index.html";
         let key = bucketPrefix + filename;
+
+        console.log("RKEY: " + key);
 
         let resourceStoreParams = {
             Body: responses[i].data,
