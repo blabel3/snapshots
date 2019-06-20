@@ -51,7 +51,6 @@ let browser = async () => {
         console.log(screenshot);
 
         let filename = "Barrons/" + dateAppend + paths[i] + "screenshots/" + "shot" + ".png"; // ex. Barrons/penta/screenshots
-
         let key = bucketPrefix + filename;
 
         let screenshotStoreParams = {
@@ -104,10 +103,13 @@ let resources = () => {
     for(let i = 0; i < responses.length; i++){
         console.log(responses[i].status);
 
+        let filename = "Barrons/" + dateAppend  + paths[i] + "resources/" + "index.html";
+        let key = bucketPrefix + filename;
+
         let resourceStoreParams = {
         Body: responses[i].data,
         Bucket: saveBucket,
-        Key: "Barrons/" + dateAppend  + paths[i] + "resources/" + "index.html" //need to edit these?
+        Key:  key//need to edit these?
         }
 
         s3.putObject(resourceStoreParams, function(error, data){
