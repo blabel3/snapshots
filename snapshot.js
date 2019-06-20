@@ -31,13 +31,12 @@ if(!process.env.SERVO_S3_BUCKET) {
 
 let s3 = new aws.S3(config);
 
-//debugging
-console.log(saveBucket);
-console.log(process.env.LOCAL);
-console.log(config);
-
 //get screenshots
 let browser = async () => {
+
+    //debugging
+    console.log(saveBucket);
+    console.log(config);
 
     //Takes screenshot
     const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
@@ -50,13 +49,14 @@ let browser = async () => {
 
         console.log(screenshot);
 
-
         let filename = "Barrons/" + dateAppend + paths[i] + "screenshots/" + "shot" + ".png"; // ex. Barrons/penta/screenshots
+
+        let key = bucketPrefix + filename;
 
         let screenshotStoreParams = {
             Body: screenshot,
             Bucket: saveBucket,
-            Key: bucketPrefix + filename,
+            Key: key,
             ContentType: "image/png"
         }
 
