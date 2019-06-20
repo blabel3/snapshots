@@ -17,12 +17,13 @@ let dateAppend = d.getUTCFullYear() + "/" + d.getUTCMonth() + "/" + d.getUTCDate
 //AWS Initilizarion
 let config = {
   apiVersion: '2006-03-01', //latest as of 2019-06-13, but don't want to use `latest~ in case anything changes.
-  region: process.env.AWS_REGION ? process.env.AWS_REGION : 'us-east-1', 
+  region: process.env.AWS_REGION, 
 }
 
 //Setting stuff differently in order to run locally
 if(!process.env.SERVO_S3_BUCKET) {
-    config.endpoint = "http://localhost:9001";
+    config.endpoint = 'http://localhost:9001';
+    config.region = 'us-east-1';
     config.accessKeyId = 'S3RVER';
     config.secretAccessKey = 'S3RVER';
     saveBucket = 'test-bucket';
@@ -35,8 +36,8 @@ let s3 = new aws.S3(config);
 let browser = async () => {
 
     //debugging
-    console.log(saveBucket);
-    console.log(config);
+    console.log("SAVE BUCKET: " + saveBucket);
+    console.log("BUCKET PREFIX: " + bucketPrefix);
 
     //Takes screenshot
     const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
