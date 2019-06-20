@@ -62,19 +62,19 @@ let browser = async () => {
             ContentType: "image/png"
         }
 
-        s3.putObject(screenshotStoreParams, function(error, data){
+        s3.putObject(screenshotStoreParams, (error, data) => {
             if (error) console.error(error); 
             else {
             console.log(data); //Will be stuff like the Etag and the versionID. 
             }
-        })
+        });
 
     }
 
-    /*s3.listObjects( { Bucket: saveBucket }, (error, data) => {
+    s3.listObjects( { Bucket: saveBucket, Marker: bucketPrefix }, (error, data) => {
         if(error) console.error(error);
         console.log(data);
-    })*/
+    })
 
     await browser.close();
 
@@ -121,7 +121,7 @@ let resources = () => {
             ContentType: "text/html"
         }
 
-        s3.putObject(resourceStoreParams, function(error, data){
+        s3.putObject(resourceStoreParams, (error, data) => {
         if (error) console.error(error); 
         else {
             console.log(data); //Will be stuff like the Etag and the versionID. 
@@ -129,10 +129,10 @@ let resources = () => {
         })
     }
 
-    /*s3.listObjects( { Bucket: saveBucket }, (error, data) => {
+    s3.listObjects( { Bucket: saveBucket, Marker: bucketPrefix }, (error, data) => {
         if(error) console.error(error);
         console.log(data);
-    })*/
+    })
 
     }).then(() => { console.log('Yay!') });
 }
