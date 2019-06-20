@@ -25,12 +25,12 @@ describe('Screenshots', function() {
         });
     });
     //TODO: Write tests for storage.
-    describe('Stores screenshot', function(){
-        before( (done) => {
+    describe('Stores screenshot', function() {
+        before( function (done) {
             storage.server.run(done); //start server
         } )
 
-        it('Puts screenshots into storage S3 bucket', (done) => {
+        it('Puts screenshots into storage S3 bucket', function (done) {
             let test = (error) => {assert.equal(!error, true)}
             storage.putInBucket(control.screenshot2, test, done);
         });
@@ -38,20 +38,20 @@ describe('Screenshots', function() {
 });
 
 //TODO: Write tests for File getter.
-describe('Resources (HTML/CSS/JS)', function(){
+describe('Resources (HTML/CSS/JS)', function() {
     describe("Gets files from website's S3 bucket", function() {
         it('Website data S3 bucket is accessible');
 
         it('Gets files from S3 Bucket');
     });
 
-    describe("Stores website files", function(){
-        it('Puts files into storage S3 bucket', (done) => {
+    describe("Stores website files", function() {
+        it('Puts files into storage S3 bucket', function (done) {
             let test = (error) => {assert.equal(!error, true)}
             storage.putInBucket("<p>Hello World!</p>", test, done);
         });
 
-        after( (done) => {
+        after( function (done) {
             storage.server.close(done); //end server
         })
     });

@@ -15,7 +15,6 @@ let putInBucket = (content, test, done) => {
 
     let storeParams;
 
-
     if(content.length < 20000) { //It's a file
         storeParams = {
             Body: content,
@@ -32,12 +31,12 @@ let putInBucket = (content, test, done) => {
         }
     }
 
-    s3.putObject(storeParams, function(error, data){
+    s3.putObject(storeParams, (error, data) => {
         test(error);
         if (error) console.error(error); 
         done();
 
-    })
+    });
 
 }
 
