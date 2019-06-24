@@ -39,6 +39,17 @@ app.get('/list', (req, res) => {
 
 });
 
+app.get('/download', (req, res) => {
+
+  const child = spawn('node', ['-e', 'require("./snapshot").getFiles()'], {
+    detached: true,
+    stdio: 'inherit'
+  });
+
+  res.send('<p>Work!!, yay?...</p>');
+
+});
+
 //Binding to servo specified port
 app.listen(process.env.PORT, () => {
   console.log(`Snapshot-Service listening on port ${process.env.PORT}...`);

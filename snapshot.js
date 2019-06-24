@@ -152,3 +152,21 @@ module.exports.checkFiles = () => {
         console.log(data);
     });
 }
+
+module.exports.getFiles = () => {
+
+    console.log(bucketPrefix);
+
+    console.log(`${saveBucket}${bucketPrefix}`);
+
+    let params = { 
+        Bucket: saveBucket,
+        Key: bucketPrefix + 'Barrons/2019/5/24/resources/index.html'
+        //StartAfter: bucketPrefix + "Barrons"
+     }
+
+    s3.getObject(params, (error, data) => {
+        if(error) console.error(error);
+        console.log(data);
+    });
+}
