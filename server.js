@@ -17,14 +17,25 @@ app.get('/_health', (req, res) => {
 })
 
 // TODO: Work with express better!
-app.get('/', async (req, res) => {
+app.get('/', (req, res) => {
 
-  const child = spawn('node', ['snapshot.js'], {
+  const child = spawn('node', ['-e', 'require("./snapshot").takeSnapshot()'], {
     detached: true,
     stdio: 'inherit'
   });
 
   res.send('<p>Working, check the logs...</p>');
+
+});
+
+app.get('/list', (req, res) => {
+
+  const child = spawn('node', ['-e', 'require("./snapshot").checkFiles()'], {
+    detached: true,
+    stdio: 'inherit'
+  });
+
+  res.send('<p>Listing, yay?...</p>');
 
 });
 

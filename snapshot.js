@@ -50,10 +50,10 @@ let browser = async () => {
 
         console.log(screenshot);
 
-        let filename = "Barrons/" + dateAppend + paths[i] + "screenshots/" + "shot" + ".png"; // ex. Barrons/penta/screenshots
+        let filename = `Barrons/${dateAppend}${paths[i]}screenshots/shot.png`; // ex. Barrons/penta/screenshots
         let key = bucketPrefix + filename;
 
-        console.log("SKEY: " + key);
+        console.log(`SKEY: ${key}`);
 
         let screenshotStoreParams = {
             Body: screenshot,
@@ -104,10 +104,10 @@ let resources = () => {
     for(let i = 0; i < responses.length; i++){
         console.log(responses[i].status);
 
-        let filename = "Barrons/" + dateAppend  + paths[i] + "resources/" + "index.html";
+        let filename = `Barrons/${dateAppend}${paths[i]}resources/index.html`;
         let key = bucketPrefix + filename;
 
-        console.log("RKEY: " + key);
+        console.log(`RKEY: ${key}`);
 
         let resourceStoreParams = {
             Body: responses[i].data,
@@ -130,13 +130,15 @@ let resources = () => {
     });
 }
 
-browser().then( (result) => {
-    resources();
-} );
+module.exports.takeSnapshot = () => {
+    browser().then( (result) => {
+        resources();
+    } );
+}
 
 module.exports.checkFiles = () => {
     s3.listObjects( { Bucket: saveBucket, Marker: bucketPrefix }, (error, data) => {
         if(error) console.error(error);
         console.log(data);
-    })
+    });
 }
