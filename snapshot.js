@@ -137,7 +137,12 @@ module.exports.takeSnapshot = () => {
 }
 
 module.exports.checkFiles = () => {
-    s3.listObjects( { Bucket: saveBucket, Marker: bucketPrefix }, (error, data) => {
+
+    console.log(bucketPrefix);
+
+    console.log(`${saveBucket}${bucketPrefix}`);
+
+    s3.listObjectsV2( { Bucket: saveBucket, StartAfter: bucketPrefix }, (error, data) => {
         if(error) console.error(error);
         console.log(data);
     });
