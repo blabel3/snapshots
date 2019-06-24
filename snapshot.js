@@ -142,7 +142,12 @@ module.exports.checkFiles = () => {
 
     console.log(`${saveBucket}${bucketPrefix}`);
 
-    s3.listObjectsV2( { Bucket: saveBucket, StartAfter: bucketPrefix }, (error, data) => {
+    let params = { 
+        Bucket: saveBucket 
+        //StartAfter: bucketPrefix + "Barrons"
+     }
+
+    s3.listObjectsV2(params, (error, data) => {
         if(error) console.error(error);
         console.log(data);
     });
