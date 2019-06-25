@@ -208,12 +208,16 @@ module.exports.getFiles = () => {
             console.log(filename);
             console.log(responses[i]);
 
-            snapshotZip.file(filename, responses[i].Body.toString());
+            if(i % 2 != 0){
+                snapshotZip.file(filename, responses[i].Body, {'binary': true}); //Screenshot
+            } else {
+                snapshotZip.file(filename, responses[i].Body.toString()); //index
+            }
         }
 
         snapshotZip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-        .pipe(fs.createWriteStream('zippy.zip'))
-        .on('finish', () => { console.log('Zippy is ready!') });
+        .pipe(fs.createWriteStream('snapshot.zip'))
+        .on('finish', () => { console.log('Snapshot.zip is ready!') });
     })
 
 }

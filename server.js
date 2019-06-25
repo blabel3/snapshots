@@ -50,8 +50,8 @@ app.get('/', (req, res) => {
 
 });
 
-app.get('/zippy', (req, res) => {
-   res.download('./zippy.zip');
+app.get('/download', (req, res) => {
+   res.download('./snapshot.zip');
 })
 
 //Binding to servo specified port
