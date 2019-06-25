@@ -1,6 +1,6 @@
 [
-    "/penta/",
-    "/",
-    "/market-data/",
-    "/advisorcenter/"
+    "penta",
+    "home",
+    "market-data",
+    "advisorcenter"
 ]

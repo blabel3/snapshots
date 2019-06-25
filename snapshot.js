@@ -1,5 +1,6 @@
 //Internal dependencies
 const paths = require('./data/paths');
+const endpoints = require('./data/endpoints');
 
 //External dependencies
 const puppeteer = require('puppeteer');
@@ -46,13 +47,13 @@ let browser = async () => {
     const page = await browser.newPage();
 
     for(let i = 0; i < paths.length; i++){
-        await page.goto(host + paths[i]);
+        await page.goto(`${host}/${paths[i]}`);
         let screenshot = await page.screenshot({fullPage: true});
         process.stdout.write(`${i}... `);
 
         console.log(screenshot);
 
-        let key = `${bucketPrefix}Barrons/${dateAppend}${paths[i]}screenshots/shot.png`; // ex. Barrons/penta/screenshots
+        let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[0]}`; // ex. Barrons/penta/screenshots
 
         console.log(`SKEY: ${key}`);
 
@@ -91,7 +92,7 @@ let resources = () => {
 
     console.log(paths[i])
 
-    let request = axios.get((host + paths[i]), {
+    let request = axios.get(`${host}/${paths[i]}`, {
         headers: { 'CF-CACHE-TAG': process.env.CF_CACHE_TAG ? process.env.CF_CACHE_TAG : 'test' }
     });
 
@@ -105,7 +106,7 @@ let resources = () => {
     for(let i = 0; i < responses.length; i++){
         console.log(responses[i].status);
 
-        let key = `${bucketPrefix}Barrons/${dateAppend}${paths[i]}resources/index.html`;
+        let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[1]}`;
 
         console.log(`RKEY: ${key}`);
 
@@ -175,15 +176,13 @@ module.exports.getFiles = () => {
     }
 
     let snapshotZip = zipper.folder(`Barrons/${dateAppend}`.replace(/\//g, "-"));
-    let endpoints = ["resources/index.html", "screenshots/shot.png"];
-
     let getRequests = [];
 
     for(let i =0; i < paths.length; i++){
 
         for(let j=0; j < endpoints.length; j++){
 
-            let key = `${bucketPrefix}Barrons/${dateAppend}${paths[i]}${endpoints[j]}`;
+            let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[j]}`;
             console.log(key)
 
             let params = { 
@@ -204,7 +203,7 @@ module.exports.getFiles = () => {
 
             let ref = i - Math.ceil(i / 2);
             console.log(ref);
-            let filename = `${paths[ref].substring(1)}${endpoints[i % 2]}`;
+            let filename = `${paths[ref].substring(1)}/${endpoints[i % 2]}`;
             console.log(filename);
             console.log(responses[i]);
 

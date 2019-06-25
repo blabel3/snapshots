@@ -3,6 +3,8 @@ const paths = require('../data/paths');
 //external dependencies
 const puppeteer = require('puppeteer');
 
+const host = "https://www.barrons.com"
+
 let goToSites = async () => {
   const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
   const page = await browser.newPage();
@@ -11,7 +13,7 @@ let goToSites = async () => {
   for(i = 0; i < paths.length; i++){
     process.stdout.write(`Site ${i}... `);
     try { 
-      await page.goto("https://www.barrons.com" + paths[i]);
+      await page.goto(`${host}/${paths[i]}`);
     } catch (error) {
       console.error(error);
       return false;

@@ -24,7 +24,7 @@ app.get('/snap', (req, res) => {
     stdio: 'inherit'
   });
 
-  res.send('<p>Working, check the logs...</p>');
+  res.status(200).send('<h1>Snapping, check the logs!</h1>');
 
 });
 
