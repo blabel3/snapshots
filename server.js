@@ -46,7 +46,11 @@ app.get('/', (req, res) => {
     stdio: 'inherit'
   });
 
-  res.send('<p>Work!!, yay?...</p>');
+  setTimeout( () => {
+    //Go get the zip we just made!
+    res.redirect('/download');
+  }, 1000);
+
 
 });
 
