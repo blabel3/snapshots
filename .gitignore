@@ -4,6 +4,7 @@ jspm_packages
 
 # Test runs for screenshot functionality
 *.png
+*.zip
 
 # Local .terraform directories
 **/.terraform/*

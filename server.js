@@ -17,7 +17,7 @@ app.get('/_health', (req, res) => {
 })
 
 // TODO: Work with express better!
-app.get('/', (req, res) => {
+app.get('/snap', (req, res) => {
 
   const child = spawn('node', ['-e', 'require("./snapshot").takeSnapshot()'], {
     detached: true,
@@ -39,16 +39,24 @@ app.get('/list', (req, res) => {
 
 });
 
-app.get('/download', (req, res) => {
+app.get('/', (req, res) => {
 
   const child = spawn('node', ['-e', 'require("./snapshot").getFiles()'], {
     detached: true,
     stdio: 'inherit'
   });
 
-  res.send('<p>Work!!, yay?...</p>');
+  setTimeout( () => {
+    //Go get the zip we just made!
+    res.redirect('/download');
+  }, 1000);
+
 
 });
+
+app.get('/download', (req, res) => {
+   res.download('./snapshot.zip');
+})
 
 //Binding to servo specified port
 app.listen(process.env.PORT, () => {

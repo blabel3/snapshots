@@ -5,14 +5,16 @@ const paths = require('./data/paths');
 const puppeteer = require('puppeteer');
 const aws = require('aws-sdk');
 const axios = require('axios');
+const zip = require('jszip');
+const fs = require('fs');
 
 //Initilization 
 let saveBucket = process.env.SERVO_S3_BUCKET;
 let bucketPrefix = process.env.SERVO_S3_KEY_PREFIX;
 const host = "https://www.barrons.com";
 
-let d = new Date();
-let dateAppend = d.getUTCFullYear() + "/" + d.getUTCMonth() + "/" + d.getUTCDate();
+let d, dateAppend;
+var zipper = new zip();
 
 //AWS Initilizarion
 let config = {
@@ -50,8 +52,7 @@ let browser = async () => {
 
         console.log(screenshot);
 
-        let filename = `Barrons/${dateAppend}${paths[i]}screenshots/shot.png`; // ex. Barrons/penta/screenshots
-        let key = bucketPrefix + filename;
+        let key = `${bucketPrefix}Barrons/${dateAppend}${paths[i]}screenshots/shot.png`; // ex. Barrons/penta/screenshots
 
         console.log(`SKEY: ${key}`);
 
@@ -104,8 +105,7 @@ let resources = () => {
     for(let i = 0; i < responses.length; i++){
         console.log(responses[i].status);
 
-        let filename = `Barrons/${dateAppend}${paths[i]}resources/index.html`;
-        let key = bucketPrefix + filename;
+        let key = `${bucketPrefix}Barrons/${dateAppend}${paths[i]}resources/index.html`;
 
         console.log(`RKEY: ${key}`);
 
@@ -130,21 +130,31 @@ let resources = () => {
     });
 }
 
-module.exports.takeSnapshot = () => {
-    browser().then( (result) => {
-        resources();
-    } );
+let formatDate = (date) => {
+    return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
+}
+
+module.exports.takeSnapshot = async () => {
+    d = new Date();
+    dateAppend = formatDate(d);
+    await browser();
+    resources();
 }
 
 module.exports.checkFiles = () => {
 
+    if( false ) { //we have a date passed in
+
+    } else {
+        d = new Date();
+        dateAppend = formatDate(d);
+    }
+
     console.log(bucketPrefix);
 
-    console.log(`${saveBucket}${bucketPrefix}`);
-
     let params = { 
-        Bucket: saveBucket 
-        //StartAfter: bucketPrefix + "Barrons"
+        Bucket: saveBucket,
+        StartAfter: bucketPrefix
      }
 
     s3.listObjectsV2(params, (error, data) => {
@@ -157,16 +167,57 @@ module.exports.getFiles = () => {
 
     console.log(bucketPrefix);
 
-    console.log(`${saveBucket}${bucketPrefix}`);
+    if( false ) { //we have a date passed in
 
-    let params = { 
-        Bucket: saveBucket,
-        Key: bucketPrefix + 'Barrons/2019/5/24/resources/index.html'
-        //StartAfter: bucketPrefix + "Barrons"
-     }
+    } else {
+        d = new Date();
+        dateAppend = formatDate(d);
+    }
 
-    s3.getObject(params, (error, data) => {
-        if(error) console.error(error);
-        console.log(data);
-    });
+    let snapshotZip = zipper.folder(`Barrons/${dateAppend}`.replace(/\//g, "-"));
+    let endpoints = ["resources/index.html", "screenshots/shot.png"];
+
+    let getRequests = [];
+
+    for(let i =0; i < paths.length; i++){
+
+        for(let j=0; j < endpoints.length; j++){
+
+            let key = `${bucketPrefix}Barrons/${dateAppend}${paths[i]}${endpoints[j]}`;
+            console.log(key)
+
+            let params = { 
+                Bucket: saveBucket,
+                Key: key
+                //StartAfter: bucketPrefix + "Barrons"
+            }
+        
+            let awsPromise = s3.getObject(params).promise();
+            getRequests.push(awsPromise);
+
+        }
+
+    }
+
+    Promise.all(getRequests).then( (responses) => {
+        for(let i=0; i < responses.length; i++){
+
+            let ref = i - Math.ceil(i / 2);
+            console.log(ref);
+            let filename = `${paths[ref].substring(1)}${endpoints[i % 2]}`;
+            console.log(filename);
+            console.log(responses[i]);
+
+            if(i % 2 != 0){
+                snapshotZip.file(filename, responses[i].Body, {'binary': true}); //Screenshot
+            } else {
+                snapshotZip.file(filename, responses[i].Body.toString()); //index
+            }
+        }
+
+        snapshotZip.generateNodeStream({type:'nodebuffer',streamFiles:true})
+        .pipe(fs.createWriteStream('snapshot.zip'))
+        .on('finish', () => { console.log('Snapshot.zip is ready!') });
+    })
+
 }
