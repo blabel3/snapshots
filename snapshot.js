@@ -131,7 +131,7 @@ let resources = () => {
 }
 
 let formatDate = (date) => {
-    return `${date.getUTCFullYear()}/${date.getUTCMonth()}/${date.getUTCDate()}`;
+    return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
 }
 
 module.exports.takeSnapshot = async () => {
