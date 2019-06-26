@@ -164,25 +164,26 @@ module.exports.checkFiles = () => {
     });
 }
 
-module.exports.getFiles = () => {
+
+
+module.exports.getFiles = (day, month, year) => {
 
     console.log(bucketPrefix);
 
-    if( false ) { //we have a date passed in
+    d = new Date();
 
-    } else {
-        d = new Date();
-        dateAppend = formatDate(d);
-    }
+    if(!day) day = d.getUTCDate();
+    if(!month) month = d.getUTCMonth() + 1; 
+    if(!year) year = d.getUTCFullYear();
 
-    let snapshotZip = zipper.folder(`Barrons/${dateAppend}`.replace(/\//g, "-"));
+    let snapshotZip = zipper.folder(`Barrons/${year}/${month}/${day}`.replace(/\//g, "-"));
     let getRequests = [];
 
     for(let i =0; i < paths.length; i++){
 
         for(let j=0; j < endpoints.length; j++){
 
-            let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[j]}`;
+            let key = `${bucketPrefix}Barrons/${year}/${month}/${day}/${paths[i]}/${endpoints[j]}`;
             console.log(key)
 
             let params = { 

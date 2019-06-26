@@ -41,7 +41,9 @@ app.get('/list', (req, res) => {
 
 app.get('/', (req, res) => {
 
-  const child = spawn('node', ['-e', 'require("./snapshot").getFiles()'], {
+  res.redirect('/date'); return;
+
+  const child = spawn('node', ['-e', `require("./snapshot").getFiles()`], {
     detached: true,
     stdio: 'inherit'
   });
@@ -51,6 +53,26 @@ app.get('/', (req, res) => {
     res.redirect('/download');
   }, 1000);
 
+
+});
+
+app.get('/date/:day?/:month?/:year?', (req, res) => {
+
+  let day = req.params.day;
+  let month = req.params.month;
+  let year = req.params.year;
+
+  console.log(`${day}, ${month}, ${year}`);
+
+  const child = spawn('node', ['-e', `require("./snapshot").getFiles(${day}, ${month}, ${year})`], {
+    detached: true,
+    stdio: 'inherit'
+  });
+
+  setTimeout( () => {
+    //Go get the zip we just made!
+    res.redirect('/download');
+  }, 1000);
 
 });
 
