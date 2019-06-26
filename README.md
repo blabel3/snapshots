@@ -19,7 +19,7 @@ Details on how to force a snapshot to be generated and how to do it on other pag
 
 Clone the repository
 
-Run npm install
+Run `npm install`
 
 * If you're on windows/linux you will have to install additional software to get puppeteer to work correctly. You can also just use docker with the dockerfile used for servo deployments on your own computer.
 
