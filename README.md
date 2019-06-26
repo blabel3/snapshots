@@ -2,6 +2,18 @@
 
 This is an service that takes a snapshot of all the sites that we want for archiving and comparing later. A snapshot includes screenshots of the site, but also a copy of the HTML, CSS, and JS that was used to generate it so that they can be interactively viewed later too. 
 
+## How to use
+
+The end user just has to go to the servo instance's endpoint for the latest snapshot, or a specific date to download the snapshot for any date after 5/26/2019.
+
+http://int.production.snapshot-service.oregon.dj01.onservo.com/
+
+OR
+
+http://int.production.snapshot-service.oregon.dj01.onservo.com/date/{{day}}/{{month}}/{{year}}
+
+If any of the day, month, or year is omitted then it will use the current date.
+
 ## Automated Snapshot Page List
 
 ### Barrons
