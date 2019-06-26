@@ -4,7 +4,7 @@ This is an service that takes a snapshot of all the sites that we want for archi
 
 ## Automated Snapshot Page List
 
-#### Barrons
+### Barrons
 
 * Home (/home)
 * Market Data Center (/market-data)
