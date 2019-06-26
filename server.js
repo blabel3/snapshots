@@ -39,20 +39,16 @@ app.get('/list', (req, res) => {
 
 });
 
+//TODO: Nice frontend for the whole service served via html here instead 
 app.get('/', (req, res) => {
 
-  res.redirect('/date'); return;
+  res.redirect('/date'); 
 
-  const child = spawn('node', ['-e', `require("./snapshot").getFiles()`], {
-    detached: true,
-    stdio: 'inherit'
-  });
+});
 
-  setTimeout( () => {
-    //Go get the zip we just made!
-    res.redirect('/download');
-  }, 1000);
+app.get('/today', (req, res) => {
 
+  res.redirect('/date'); 
 
 });
 
