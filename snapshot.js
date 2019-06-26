@@ -203,7 +203,7 @@ module.exports.getFiles = () => {
 
             let ref = i - Math.ceil(i / 2);
             console.log(ref);
-            let filename = `${paths[ref].substring(1)}/${endpoints[i % 2]}`;
+            let filename = `${paths[ref]}/${endpoints[i % 2]}`;
             console.log(filename);
             console.log(responses[i]);
 
