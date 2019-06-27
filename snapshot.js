@@ -164,6 +164,32 @@ module.exports.checkFiles = () => {
     });
 }
 
+let getObjectsSafely = (prefix, callback) => {
+    if (prefix.lastIndexOf('/') !== prefix.length - 1){
+        prefix += '/';
+    }
+
+    const listOptions = {
+        Bucket: saveBucket,
+        Delimiter: '/',
+        MaxKeys: 1000, //Default is 2
+        Prefix: bucketPrefix + prefix
+    }
+
+    s3.listObjectsV2(listOptions, (error, data) => {
+        if (err) {
+            console.error(error);
+            return callback(error);
+        }
+
+        if(!data.Contents || data.Contents.length === 0){
+            if (data.CommonPrefixes.length) {
+                //TODO this
+            }
+        }
+    })
+
+}
 
 
 module.exports.getFiles = (day, month, year) => {
@@ -176,7 +202,9 @@ module.exports.getFiles = (day, month, year) => {
     if(!month) month = d.getUTCMonth() + 1; 
     if(!year) year = d.getUTCFullYear();
 
-    let snapshotZip = zipper.folder(`Barrons/${year}/${month}/${day}`.replace(/\//g, "-"));
+    let foldername = `Barrons/${year}/${month}/${day}`.replace(/\//g, "-");
+
+    let snapshotZip = zipper.folder(foldername);
     let getRequests = [];
 
     for(let i =0; i < paths.length; i++){
@@ -216,7 +244,7 @@ module.exports.getFiles = (day, month, year) => {
         }
 
         snapshotZip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-        .pipe(fs.createWriteStream('snapshot.zip'))
+        .pipe(fs.createWriteStream(`${foldername}.zip`))
         .on('finish', () => { console.log('Snapshot.zip is ready!') });
     })
 
