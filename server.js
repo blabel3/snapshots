@@ -5,6 +5,7 @@ const { spawn } = require('child_process');
 
 //Initilization
 const app = express();
+var zipfilename;
 
 //Servo required health check
 app.get('/_health', (req, res) => {
@@ -62,8 +63,10 @@ app.get('/date/:day?/:month?/:year?', (req, res) => {
 
   const child = spawn('node', ['-e', `require("./snapshot").getFiles(${day}, ${month}, ${year})`], {
     detached: true,
-    stdio: 'inherit'
+    stdio: ['inherit', 'inherit', 'inherit', 'ipc']
   });
+
+  child.on('message', message => { zipfilename = message; } )
 
   setTimeout( () => {
     //Go get the zip we just made!
@@ -73,7 +76,7 @@ app.get('/date/:day?/:month?/:year?', (req, res) => {
 });
 
 app.get('/download', (req, res) => {
-   res.download('./snapshot.zip');
+  res.download(`./${zipfilename}`);
 })
 
 //Binding to servo specified port

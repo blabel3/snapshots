@@ -132,8 +132,7 @@ let resources = () => {
 }
 
 let formatDate = (date) => {
-    console.log(date.getHours() + ":" date.getUTCHours());
-    return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
+    return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 }
 
 module.exports.takeSnapshot = async () => {
@@ -143,16 +142,15 @@ module.exports.takeSnapshot = async () => {
     resources();
 }
 
-module.exports.checkFiles = () => {
-
-    if( false ) { //we have a date passed in
-
-    } else {
-        d = new Date();
-        dateAppend = formatDate(d);
-    }
+module.exports.checkFiles = (day, month, year) => {
 
     console.log(bucketPrefix);
+
+    d = new Date();
+
+    if(!day) day = d.getUTCDate();
+    if(!month) month = d.getUTCMonth() + 1; 
+    if(!year) year = d.getUTCFullYear();
 
     let params = { 
         Bucket: saveBucket,
@@ -192,18 +190,24 @@ let getObjectsSafely = (prefix, callback) => {
 
 }
 
-
 module.exports.getFiles = (day, month, year) => {
 
     console.log(bucketPrefix);
 
     d = new Date();
 
-    if(!day) day = d.getUTCDate();
-    if(!month) month = d.getUTCMonth() + 1; 
-    if(!year) year = d.getUTCFullYear();
+    if(!day) day = d.getDate();
+    if(!month) month = d.getMonth() + 1; 
+    if(!year) year = d.getFullYear();
 
     let foldername = `Barrons/${year}/${month}/${day}`.replace(/\//g, "-");
+    let outputzip = foldername + ".zip";
+    if(process.send) {
+        process.send(outputzip);
+        console.log("Sent! :)");
+    } else {
+        console.log("Output file name not sent to parent. :(");
+    }
 
     let snapshotZip = zipper.folder(foldername);
     let getRequests = [];
@@ -231,22 +235,19 @@ module.exports.getFiles = (day, month, year) => {
     Promise.all(getRequests).then( (responses) => {
         for(let i=0; i < responses.length; i++){
 
-            let ref = i - Math.ceil(i / 2);
+            let ref = i - Math.ceil(i / endpoints.length); //Hits every path for each endpoint.
             console.log(ref);
-            let filename = `${paths[ref]}/${endpoints[i % 2]}`;
+            let filename = `${paths[ref]}/${endpoints[i % endpoints.length]}`;
             console.log(filename);
             console.log(responses[i]);
 
-            if(i % 2 != 0){
-                snapshotZip.file(filename, responses[i].Body, {'binary': true}); //Screenshot
-            } else {
-                snapshotZip.file(filename, responses[i].Body.toString()); //index
-            }
+            snapshotZip.file(filename, responses[i].Body, {'binary': true}); //Screenshots and others can both be saved as binary.
         }
 
+
         snapshotZip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-        .pipe(fs.createWriteStream(`${foldername}.zip`))
-        .on('finish', () => { console.log('Snapshot.zip is ready!') });
+        .pipe(fs.createWriteStream(`${outputzip}`)
+        .on('finish', () => { console.log(`${outputzip} is ready!`) }));
     })
 
 }
