@@ -164,7 +164,11 @@ module.exports.checkFiles = (day, month, year) => {
     });*/
 
     getObjectList('/', response => {
-        console.log(response);
+        if (err) {
+            console.error(err);
+          } else {
+            console.log(results);
+          }
     }  );
 
 }
