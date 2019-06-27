@@ -132,6 +132,7 @@ let resources = () => {
 }
 
 let formatDate = (date) => {
+    console.log(date.getHours() + ":" date.getUTCHours());
     return `${date.getUTCFullYear()}/${date.getUTCMonth() + 1}/${date.getUTCDate()}`;
 }
 
