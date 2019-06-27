@@ -3,11 +3,12 @@ const paths = require('./data/paths');
 const endpoints = require('./data/endpoints');
 
 //External dependencies
+const async = require('async');
+const fs = require('fs');
 const puppeteer = require('puppeteer');
 const aws = require('aws-sdk');
 const axios = require('axios');
 const zip = require('jszip');
-const fs = require('fs');
 
 //Initilization 
 let saveBucket = process.env.SERVO_S3_BUCKET;
@@ -157,37 +158,50 @@ module.exports.checkFiles = (day, month, year) => {
         StartAfter: bucketPrefix
      }
 
-    s3.listObjectsV2(params, (error, data) => {
+    /*s3.listObjectsV2(params, (error, data) => {
         if(error) console.error(error);
         console.log(data);
-    });
+    });*/
+
+    getObjectList('/', response => {
+        console.log(response);
+    }  );
+
 }
 
-let getObjectsSafely = (prefix, callback) => {
-    if (prefix.lastIndexOf('/') !== prefix.length - 1){
-        prefix += '/';
+function getObjectList (prefix, cb) {
+    if (prefix.lastIndexOf('/') !== prefix.length - 1) {
+      prefix += '/';
     }
-
+  
     const listOptions = {
-        Bucket: saveBucket,
-        Delimiter: '/',
-        MaxKeys: 1000, //Default is 2
-        Prefix: bucketPrefix + prefix
-    }
-
-    s3.listObjectsV2(listOptions, (error, data) => {
-        if (err) {
-            console.error(error);
-            return callback(error);
+      Bucket: saveBucket,
+      Delimiter: '/',
+      MaxKeys: 1000,
+      Prefix: bucketPrefix + prefix
+    };
+  
+    s3.listObjectsV2(listOptions, function(err, data) {
+      if (err) {
+        logger.error(err, err.stack);
+        return cb(err);
+      }
+      if (!data.Contents || data.Contents.length === 0) {
+        if (data.CommonPrefixes.length) {
+          async.map(data.CommonPrefixes, (subPrefix, next) => {
+            getObjectList(subPrefix.Prefix.substring((bucketPrefix).length), (oErr, subData) => {
+              next(null, subData);
+            });
+          }, (mapErr, results) => {
+            cb(null, _.flatten(results));
+          });
+        } else {
+          cb(null, data.CommonPrefixes);
         }
-
-        if(!data.Contents || data.Contents.length === 0){
-            if (data.CommonPrefixes.length) {
-                //TODO this
-            }
-        }
-    })
-
+      } else {
+        cb(null, data.Contents);
+      }
+    });
 }
 
 module.exports.getFiles = (day, month, year) => {
