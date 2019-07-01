@@ -184,7 +184,7 @@ function getObjectList (datePrefix, cb) {
   
     s3.listObjectsV2(listOptions, function(err, data) {
       if (err) {
-        logger.error(err, err.stack);
+        console.error(err);
         return cb(err);
       }
       console.log(data);
