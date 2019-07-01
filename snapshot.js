@@ -163,26 +163,23 @@ module.exports.checkFiles = (day, month, year) => {
         console.log(data);
     });*/
 
-    getObjectList('/', response => {
+    getObjectList('', (err, response) => {
         if (err) {
             console.error(err);
           } else {
-            console.log(results);
+            console.log(response);
           }
     }  );
 
 }
 
-function getObjectList (prefix, cb) {
-    if (prefix.lastIndexOf('/') !== prefix.length - 1) {
-      prefix += '/';
-    }
+function getObjectList (datePrefix, cb) {
   
     const listOptions = {
       Bucket: saveBucket,
-      Delimiter: '/',
+      //Delimiter: '/',
       MaxKeys: 1000,
-      Prefix: bucketPrefix + prefix
+      Prefix: bucketPrefix + datePrefix
     };
   
     s3.listObjectsV2(listOptions, function(err, data) {
@@ -190,6 +187,7 @@ function getObjectList (prefix, cb) {
         logger.error(err, err.stack);
         return cb(err);
       }
+      console.log(data);
       if (!data.Contents || data.Contents.length === 0) {
         if (data.CommonPrefixes.length) {
           async.map(data.CommonPrefixes, (subPrefix, next) => {
