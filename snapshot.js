@@ -181,6 +181,8 @@ function getObjectList (datePrefix, cb) {
       MaxKeys: 1000,
       Prefix: bucketPrefix + datePrefix
     };
+
+    console.log(saveBucket + bucketPrefix + datePrefix);
   
     s3.listObjectsV2(listOptions, function(err, data) {
       if (err) {
