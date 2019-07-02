@@ -179,10 +179,11 @@ function getObjectList (datePrefix, cb) {
       Bucket: saveBucket,
       //Delimiter: '/',
       MaxKeys: 1000,
-      StartAfter: bucketPrefix + datePrefix
+      Prefix: bucketPrefix + datePrefix
     };
 
-    console.log(saveBucket + bucketPrefix + datePrefix);
+    console.log(bucketPrefix + datePrefix);
+    console.log(listOptions);
   
     s3.listObjectsV2(listOptions, function(err, data) {
       if (err) {
