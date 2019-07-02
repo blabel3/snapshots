@@ -177,7 +177,7 @@ function getObjectList (datePrefix, cb) {
   
     const listOptions = {
       Bucket: saveBucket,
-      //Delimiter: '/',
+      Delimiter: '/',
       MaxKeys: 1000,
       Prefix: bucketPrefix + datePrefix
     };
