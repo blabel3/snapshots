@@ -1,13 +1,22 @@
-var today = new Date();
-var dd = today.getDate();
-var mm = today.getMonth()+1; //January is 0!
-var yyyy = today.getFullYear();
- if(dd<10){
-        dd='0'+dd
-    } 
-    if(mm<10){
-        mm='0'+mm
-    } 
+$('#archive').datepicker({
+    language: "en",
+    inline: true,
+    minDate: new Date(2019, 6, 1),
+    maxDate: new Date(),
+    startDate: new Date(),
+    dateFormat: "d m yyyy",
+    onRenderCell: function (date, cellType) {
+        if (cellType == 'day') {
+            return (date.getDay() == 0 || date.getDay() == 6) ? {disabled: true} : { disabled: false }
+        }
+    }
+});
 
-today = yyyy+'-'+mm+'-'+dd;
-document.getElementById("archive").setAttribute("max", today);
+function downloadDate() {
+    var date = document.getElementById("archive").value;
+    console.log(date);
+    let dateParsed = date.split(" ").map( numberString => parseInt(numberString)); //ensures we have actual date numbers. 
+    console.log(dateParsed);
+    console.log(`/date/${dateParsed[0]}/${dateParsed[1]}/${dateParsed[2]}`);
+    window.location.replace(`/date/${dateParsed[0]}/${dateParsed[1]}/${dateParsed[2]}`);
+}

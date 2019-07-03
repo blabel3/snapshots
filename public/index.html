@@ -1,13 +1,23 @@
+<script src="https://code.jquery.com/jquery-3.4.1.slim.js"></script>
+
+<script src="dist/js/datepicker.min.js"></script>
+<link href="dist/css/datepicker.min.css" rel="stylesheet" type="text/css"> 
+
+<!-- Include English language -->
+<script src="dist/js/i18n/datepicker.en.js"></script>
+
+<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" type="text/css"> 
 
 <link rel="stylesheet" href="style.css">
 
-<h1>Download</h1>
-<button><a href="/date">Today</a></button>
-<br></br>
-<form action="/date">
-    <label for="archive">Older snapshots</label>
-    <input id="archive" type="date" min="2019-06-27">
-    <input type="submit" value="Submit">
-</form>
+<div class="content">
+    <h1>Snapshot Service</h1>
+
+    <h2>Download</h2>
+
+    <div id="archive"> </div>
+
+    <button onclick="downloadDate()">Download This Date</button>
+</div>
 
 <script src="main.js"></script>

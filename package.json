@@ -4,9 +4,11 @@
   "description": "Takes automated snapshots of a website",
   "main": "index.js",
   "dependencies": {
+    "air-datepicker": "^2.2.3",
     "aws-sdk": "^2.472.0",
     "axios": "^0.19.0",
     "express": "^4.17.1",
+    "jquery": "^3.4.1",
     "jszip": "^3.2.1",
     "puppeteer": "^1.17.0"
   },
@@ -15,6 +17,7 @@
     "s3rver": "^3.2.0"
   },
   "scripts": {
+    "postinstall": "cp -rf node_modules/air-datepicker/dist public/dist",
     "test": "mocha",
     "local": "PORT=8080 LOCAL=true npm start",
     "server": "s3rver -a 127.0.0.1 -p 9001 -d /tmp/s3rver --configure-bucket test-bucket.localhost"
