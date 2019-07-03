@@ -194,9 +194,10 @@ function getObjectList (datePrefix, cb) {
       if (!data.Contents || data.Contents.length === 0) {
         if (data.CommonPrefixes.length) {
           async.map(data.CommonPrefixes, (subPrefix, next) => {
-            getObjectList(subPrefix.Prefix.substring((bucketPrefix).length), (oErr, subData) => {
+            let recursiveCall = getObjectList(subPrefix.Prefix.substring((bucketPrefix).length), (oErr, subData) => {
               next(null, subData);
             });
+            console.log(recursiveCall);
           }, (mapErr, results) => {
             cb(null, _.flatten(results));
           });
