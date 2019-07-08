@@ -16,10 +16,6 @@ h1 {
     text-align: center;
 }
 
-input {
-    width: 80%;
-    margin-bottom: 15px;
-}
 
 .form-control {
     display: none;
@@ -30,8 +26,4 @@ input {
     max-width: 600px;
     margin:auto; 
     display: block;
-}
-
-button {
-    margin-top: 15px;
 }
