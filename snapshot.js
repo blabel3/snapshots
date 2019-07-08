@@ -136,25 +136,31 @@ let formatDate = (date) => {
     return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 }
 
+let saveJSON = (object, dateAppend, fileName) => {
+
+    let saveParams = {
+        Body: object.toString(),
+        Bucket: saveBucket,
+        Key: `${bucketPrefix}Barrons/${dateAppend}/${fileName}.json`,
+        ContentType: "application/json"
+    }
+
+    s3.putObject(saveParams, (error, data) => {
+        if (error) console.error(error); 
+        else {
+            console.log(data); //Will be stuff like the Etag and the versionID. 
+        }
+    })
+}
+
 module.exports.takeSnapshot = async () => {
     d = new Date();
     dateAppend = formatDate(d);
 
     console.log(paths);
 
-    let pageSaveParams = {
-        Body: paths.toString(),
-        Bucket: saveBucket,
-        Key: `${bucketPrefix}Barrons/${dateAppend}/paths.json`,
-        ContentType: "application/json"
-    }
-
-    s3.putObject(pageSaveParams, (error, data) => {
-        if (error) console.error(error); 
-        else {
-            console.log(data); //Will be stuff like the Etag and the versionID. 
-        }
-    })
+    saveJSON(paths, dateAppend, 'paths');
+    saveJSON(endpoints, dateAppend, 'endpoints');
 
     await browser();
     resources();
@@ -242,13 +248,22 @@ module.exports.getFiles = async (day, month, year) => {
         Key: `${bucketPrefix}Barrons/${year}/${month}/${day}/paths.json`
     }
 
-    console.log('YAYYYY')
     let pathsPromise = s3.getObject(pathsParams).promise();
 
     let recievedPaths = await pathsPromise;
     let snapshotPaths = recievedPaths.Body.toString().split(",");
 
-    console.log(snapshotPaths);
+    let endpointsParams = {
+        Bucket: saveBucket,
+        Key: `${bucketPrefix}Barrons/${year}/${month}/${day}/endpoints.json`
+    }
+
+    let endpointsPromise = s3.getObject(endpointsParams).promise();
+
+    let recievedEndpoints = await endpointsPromise;
+    let snapshotEndpoints = recievedEndpoints.Body.toString().split(",");
+
+    console.log(snapshotEndpoints);
 
     let foldername = `Barrons/${year}/${month}/${day}`.replace(/\//g, "-");
     let outputzip = foldername + ".zip";
@@ -266,7 +281,7 @@ module.exports.getFiles = async (day, month, year) => {
 
         for(let j=0; j < endpoints.length; j++){
 
-            let key = `${bucketPrefix}Barrons/${year}/${month}/${day}/${snapshotPaths[i]}/${endpoints[j]}`;
+            let key = `${bucketPrefix}Barrons/${year}/${month}/${day}/${snapshotPaths[i]}/${snapshotEndpoints[j]}`;
             console.log(key)
 
             let params = { 
@@ -285,9 +300,9 @@ module.exports.getFiles = async (day, month, year) => {
     Promise.all(getRequests).then( (responses) => {
         for(let i=0; i < responses.length; i++){
 
-            let ref = i - Math.ceil(i / endpoints.length); //Hits every path for each endpoint.
+            let ref = i - Math.ceil(i / snapshotEndpoints.length); //Hits every path for each endpoint.
             console.log(ref);
-            let filename = `${snapshotPaths[ref]}/${endpoints[i % endpoints.length]}`;
+            let filename = `${snapshotPaths[ref]}/${snapshotEndpoints[i % snapshotEndpoints.length]}`;
             console.log(filename);
             console.log(responses[i]);
 
