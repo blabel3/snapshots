@@ -1,7 +1,7 @@
 let datepicker = $('#archive').datepicker({
     language: "en",
     inline: true,
-    minDate: new Date(2019, 6, 1),
+    minDate: new Date(2019, 7 + 1, 8),
     maxDate: new Date(),
     dateFormat: "d m yyyy",
     onRenderCell: function (date, cellType) {

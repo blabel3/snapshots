@@ -4,7 +4,7 @@ This is an service that takes a snapshot of all the sites that we want for archi
 
 ## How to use
 
-The end user just has to go to the servo instance's endpoint for the latest snapshot, or a specific date to download the snapshot for any date after **6/27/2019**.
+The end user just has to go to the servo instance's endpoint for the latest snapshot, or a specific date to download the snapshot for any date after and including **7/9/2019**.
 
 http://int.production.snapshot-service.oregon.dj01.onservo.com/
 
