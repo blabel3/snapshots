@@ -39,24 +39,18 @@ let s3 = new aws.S3(config);
 //get screenshots
 let browser = async () => {
 
-    //debugging
-    console.log("SAVE BUCKET: " + saveBucket);
-    console.log("BUCKET PREFIX: " + bucketPrefix);
-
     //Takes screenshot
     const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
     const page = await browser.newPage();
 
     for(let i = 0; i < paths.length; i++){
+        process.stdout.write(`Screenshotting ${i} (${host}/${paths[i]})... `);
         await page.goto(`${host}/${paths[i]}`);
+        console.log('✓ Done!');
         let screenshot = await page.screenshot({fullPage: true});
-        process.stdout.write(`${i}... `);
-
-        console.log(screenshot);
-
+        
         let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[0]}`; // ex. Barrons/penta/screenshots
-
-        console.log(`SKEY: ${key}`);
+        console.log(`  Screenshot KEY: ${key}`);
 
         let screenshotStoreParams = {
             Body: screenshot,
@@ -67,9 +61,7 @@ let browser = async () => {
 
         s3.putObject(screenshotStoreParams, (error, data) => {
             if (error) console.error(error); 
-            else {
-            console.log(data); //Will be stuff like the Etag and the versionID. 
-            }
+            //data is just the Etag and the versionID. We don't need to do anything with it.
         });
 
     }
@@ -78,57 +70,49 @@ let browser = async () => {
 
 };
 
-//Get other site files
+//Gets CSS/HTML/JS 
 let resources = () => {
-    //Gets CSS/HTML/JS 
-
-    //debugging
-    console.log("SAVE BUCKET: " + saveBucket);
-    console.log("BUCKET PREFIX: " + bucketPrefix);
 
     let requests = [];
 
     //Set up all requests we need
     for(let i = 0; i < paths.length; i++){
 
-    console.log(paths[i])
+        let request = axios.get(`${host}/${paths[i]}`, {
+            headers: { 'CF-CACHE-TAG': process.env.CF_CACHE_TAG ? process.env.CF_CACHE_TAG : 'test' }
+        });
 
-    let request = axios.get(`${host}/${paths[i]}`, {
-        headers: { 'CF-CACHE-TAG': process.env.CF_CACHE_TAG ? process.env.CF_CACHE_TAG : 'test' }
-    });
-
-    requests.push(request);
+        requests.push(request);
 
     }
+
+    console.log("Making all HTTP requests for resources...")
 
     //Run all requests simultaneously then work with the responses.
     Promise.all(requests).then( (responses) => {
 
-    for(let i = 0; i < responses.length; i++){
-        console.log(responses[i].status);
+        console.log("Resources obtained!");
 
-        let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[1]}`;
+        for(let i = 0; i < responses.length; i++){
+            let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[1]}`;
 
-        console.log(`RKEY: ${key}`);
+            console.log(`Storing file: ${key}`);
 
-        let resourceStoreParams = {
-            Body: responses[i].data,
-            Bucket: saveBucket,
-            Key:  key, 
-            ContentType: "text/html"
+            let resourceStoreParams = {
+                Body: responses[i].data,
+                Bucket: saveBucket,
+                Key:  key, 
+                ContentType: "text/html"
+            }
+
+            s3.putObject(resourceStoreParams, (error, data) => {
+                if (error) console.error(error); 
+                //data is just the Etag and the versionID. We don't need to do anything with it.
+            })
         }
-
-        s3.putObject(resourceStoreParams, (error, data) => {
-        if (error) console.error(error); 
-        else {
-            console.log(data); //Will be stuff like the Etag and the versionID. 
-        }
-        })
-    }
 
     }).then(() => { 
-
-        console.log('Yay!') 
+        console.log('Snapshot taken!') 
     });
 }
 
@@ -137,7 +121,6 @@ let formatDate = (date) => {
 }
 
 let saveJSON = (object, dateAppend, fileName) => {
-
     let saveParams = {
         Body: object.toString(),
         Bucket: saveBucket,
@@ -147,9 +130,7 @@ let saveJSON = (object, dateAppend, fileName) => {
 
     s3.putObject(saveParams, (error, data) => {
         if (error) console.error(error); 
-        else {
-            console.log(data); //Will be stuff like the Etag and the versionID. 
-        }
+        //data is just the Etag and the versionID. We don't need to do anything with it.
     })
 }
 
@@ -157,7 +138,12 @@ module.exports.takeSnapshot = async () => {
     d = new Date();
     dateAppend = formatDate(d);
 
+    //debugging
+    console.log("SAVE BUCKET: " + saveBucket);
+    console.log("BUCKET PREFIX: " + bucketPrefix);
+
     console.log(paths);
+    console.log(endpoints);
 
     saveJSON(paths, dateAppend, 'paths');
     saveJSON(endpoints, dateAppend, 'endpoints');
@@ -166,110 +152,44 @@ module.exports.takeSnapshot = async () => {
     resources();
 }
 
-module.exports.checkFiles = (day, month, year) => {
+//Sets variable from JSON data in S3 Bucket
+let setZipPages = async (file, day, month, year) => {
 
-    console.log(bucketPrefix);
-
-    d = new Date();
-
-    if(!day) day = d.getUTCDate();
-    if(!month) month = d.getUTCMonth() + 1; 
-    if(!year) year = d.getUTCFullYear();
-
-    let params = { 
+    let params = {
         Bucket: saveBucket,
-        StartAfter: bucketPrefix
-     }
+        Key: `${bucketPrefix}Barrons/${year}/${month}/${day}/${file}.json`
+    }
 
-    /*s3.listObjectsV2(params, (error, data) => {
-        if(error) console.error(error);
-        console.log(data);
-    });*/
+    let promise = s3.getObject(params).promise();
+    let recievedSettings = await promise;
 
-    getObjectList('', (err, response) => {
-        if (err) {
-            console.error(err);
-          } else {
-            console.log(response);
-          }
-    }  );
+    let settings = recievedSettings.Body.toString().split(",");
 
-}
+    console.log(settings);
+    return settings;
 
-function getObjectList (datePrefix, cb) {
-  
-    const listOptions = {
-      Bucket: saveBucket,
-      //Delimiter: '/',
-      MaxKeys: 1000,
-      Prefix: bucketPrefix + datePrefix
-    };
-
-    console.log(bucketPrefix + datePrefix);
-    console.log(listOptions);
-  
-    s3.listObjectsV2(listOptions, function(err, data) {
-      if (err) {
-        console.error(err);
-        return cb(err);
-      }
-      console.log(data);
-      if (!data.Contents || data.Contents.length === 0) {
-        if (data.CommonPrefixes.length) {
-          async.map(data.CommonPrefixes, (subPrefix, next) => {
-            let recursiveCall = getObjectList(subPrefix.Prefix.substring((bucketPrefix).length), (oErr, subData) => {
-              next(null, subData);
-            });
-            console.log(recursiveCall);
-          }, (mapErr, results) => {
-            cb(null, _.flatten(results));
-          });
-        } else {
-          cb(null, data.CommonPrefixes);
-        }
-      } else {
-        cb(null, data.Contents);
-      }
-    });
 }
 
 module.exports.getFiles = async (day, month, year) => {
 
     console.log(bucketPrefix);
 
-    d = new Date();
+    let today = new Date();
 
     if(!day) day = d.getDate();
     if(!month) month = d.getMonth() + 1; 
     if(!year) year = d.getFullYear();
 
-    let pathsParams = {
-        Bucket: saveBucket,
-        Key: `${bucketPrefix}Barrons/${year}/${month}/${day}/paths.json`
-    }
+    //Get pages that were taken by the snapshot from S3.
+    let snapshotPaths = await setZipPages('paths', day, month, year);
+    let snapshotEndpoints = await setZipPages('endpoints', day, month, year);
 
-    let pathsPromise = s3.getObject(pathsParams).promise();
-
-    let recievedPaths = await pathsPromise;
-    let snapshotPaths = recievedPaths.Body.toString().split(",");
-
-    let endpointsParams = {
-        Bucket: saveBucket,
-        Key: `${bucketPrefix}Barrons/${year}/${month}/${day}/endpoints.json`
-    }
-
-    let endpointsPromise = s3.getObject(endpointsParams).promise();
-
-    let recievedEndpoints = await endpointsPromise;
-    let snapshotEndpoints = recievedEndpoints.Body.toString().split(",");
-
-    console.log(snapshotEndpoints);
-
+    //Set up output zip.
     let foldername = `Barrons/${year}/${month}/${day}`.replace(/\//g, "-");
     let outputzip = foldername + ".zip";
     if(process.send) {
         process.send(outputzip);
-        console.log("Sent! :)");
+        console.log("Sent output filename! :)");
     } else {
         console.log("Output file name not sent to parent. :(");
     }
@@ -279,15 +199,14 @@ module.exports.getFiles = async (day, month, year) => {
 
     for(let i =0; i < snapshotPaths.length; i++){
 
-        for(let j=0; j < endpoints.length; j++){
+        for(let j=0; j < snapshotEndpoints.length; j++){
 
             let key = `${bucketPrefix}Barrons/${year}/${month}/${day}/${snapshotPaths[i]}/${snapshotEndpoints[j]}`;
-            console.log(key)
+            console.log(`Request: ${key}`)
 
             let params = { 
                 Bucket: saveBucket,
                 Key: key
-                //StartAfter: bucketPrefix + "Barrons"
             }
         
             let awsPromise = s3.getObject(params).promise();
@@ -301,75 +220,12 @@ module.exports.getFiles = async (day, month, year) => {
         for(let i=0; i < responses.length; i++){
 
             let ref = i - Math.ceil(i / snapshotEndpoints.length); //Hits every path for each endpoint.
-            console.log(ref);
             let filename = `${snapshotPaths[ref]}/${snapshotEndpoints[i % snapshotEndpoints.length]}`;
-            console.log(filename);
-            console.log(responses[i]);
+            process.stdout.write(`Zipping ${filename}... `);
 
             snapshotZip.file(filename, responses[i].Body, {'binary': true}); //Screenshots and others can both be saved as binary.
+            console.log('✓ Done!');
         }
-
-        snapshotZip.generateNodeStream({type:'nodebuffer',streamFiles:true})
-        .pipe(fs.createWriteStream(`${outputzip}`)
-        .on('finish', () => { console.log(`${outputzip} is ready!`) }));
-    })
-
-}
-
-module.exports.getFile = (day, month, year) => {
-
-    console.log(bucketPrefix);
-
-    d = new Date();
-
-    if(!day) day = d.getDate();
-    if(!month) month = d.getMonth() + 1; 
-    if(!year) year = d.getFullYear();
-
-    let foldername = `Barrons/${year}/${month}/${day}`.replace(/\//g, "-");
-    let outputzip = foldername + ".zip";
-    if(process.send) {
-        process.send(outputzip);
-        console.log("Sent! :)");
-    } else {
-        console.log("Output file name not sent to parent. :(");
-    }
-
-    let snapshotZip = zipper.folder(foldername);
-    let getRequests = [];
-
-    for(let i =0; i < paths.length; i++){
-
-        for(let j=0; j < endpoints.length; j++){
-
-            let key = `${bucketPrefix}Barrons/${year}/${month}/${day}/${paths[i]}/${endpoints[j]}`;
-            console.log(key)
-
-            let params = { 
-                Bucket: saveBucket,
-                Key: key
-                //StartAfter: bucketPrefix + "Barrons"
-            }
-        
-            let awsPromise = s3.getObject(params).promise();
-            getRequests.push(awsPromise);
-
-        }
-
-    }
-
-    Promise.all(getRequests).then( (responses) => {
-        for(let i=0; i < responses.length; i++){
-
-            let ref = i - Math.ceil(i / endpoints.length); //Hits every path for each endpoint.
-            console.log(ref);
-            let filename = `${paths[ref]}/${endpoints[i % endpoints.length]}`;
-            console.log(filename);
-            console.log(responses[i]);
-
-            snapshotZip.file(filename, responses[i].Body, {'binary': true}); //Screenshots and others can both be saved as binary.
-        }
-
 
         snapshotZip.generateNodeStream({type:'nodebuffer',streamFiles:true})
         .pipe(fs.createWriteStream(`${outputzip}`)

@@ -15,10 +15,8 @@ datepicker.selectDate(new Date());
 
 function downloadDate() {
     let dirtyDate = document.getElementById("archive").value;
-    console.log(dirtyDate);
-    let date = dirtyDate.split(" ").map( numberString => parseInt(numberString)); //ensures we have actual date numbers. 
-    console.log(date);
-    console.log(`/date/${date[0]}/${date[1]}/${date[2]}`);
+    let date = dirtyDate.split(" ").map( numberString => parseInt(numberString)); //ensures we have actual date numbers. No zeroes throwing stuff off either. 
+    console.log(`Going to /date/${date[0]}/${date[1]}/${date[2]}...`);
     window.location.replace(`/date/${date[0]}/${date[1]}/${date[2]}`);
 }
 
