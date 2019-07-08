@@ -6,6 +6,7 @@ const { spawn } = require('child_process');
 //Initilization
 const app = express();
 var zipfilename;
+app.use(express.static('public')); //serves files in public. 
 
 //Servo required health check
 app.get('/_health', (req, res) => {
@@ -40,13 +41,6 @@ app.get('/list', (req, res) => {
 
 });
 
-//TODO: Nice frontend for the whole service served via html here instead 
-app.get('/', (req, res) => {
-
-  res.redirect('/date'); 
-
-});
-
 app.get('/today', (req, res) => {
 
   res.redirect('/date'); 
@@ -58,6 +52,10 @@ app.get('/date/:day?/:month?/:year?', (req, res) => {
   let day = req.params.day;
   let month = req.params.month;
   let year = req.params.year;
+
+  if(req.body){
+    console.log(body);
+  }
 
   console.log(`${day}, ${month}, ${year}`);
 

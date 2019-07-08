@@ -1,0 +1,29 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #42a5f5;
+}
+
+.content {
+    background-color: #ffffff;
+    border-radius: 5px;
+    max-width: 900px;
+    margin: auto;
+    padding: 15px;
+    display: block;
+}
+
+h1 {
+    text-align: center;
+}
+
+
+.form-control {
+    display: none;
+}
+
+.datepicker {
+    width: 100%;
+    max-width: 600px;
+    margin:auto; 
+    display: block;
+}

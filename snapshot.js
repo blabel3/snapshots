@@ -163,35 +163,41 @@ module.exports.checkFiles = (day, month, year) => {
         console.log(data);
     });*/
 
-    getObjectList('/', response => {
-        console.log(response);
+    getObjectList('', (err, response) => {
+        if (err) {
+            console.error(err);
+          } else {
+            console.log(response);
+          }
     }  );
 
 }
 
-function getObjectList (prefix, cb) {
-    if (prefix.lastIndexOf('/') !== prefix.length - 1) {
-      prefix += '/';
-    }
+function getObjectList (datePrefix, cb) {
   
     const listOptions = {
       Bucket: saveBucket,
-      Delimiter: '/',
+      //Delimiter: '/',
       MaxKeys: 1000,
-      Prefix: bucketPrefix + prefix
+      Prefix: bucketPrefix + datePrefix
     };
+
+    console.log(bucketPrefix + datePrefix);
+    console.log(listOptions);
   
     s3.listObjectsV2(listOptions, function(err, data) {
       if (err) {
-        logger.error(err, err.stack);
+        console.error(err);
         return cb(err);
       }
+      console.log(data);
       if (!data.Contents || data.Contents.length === 0) {
         if (data.CommonPrefixes.length) {
           async.map(data.CommonPrefixes, (subPrefix, next) => {
-            getObjectList(subPrefix.Prefix.substring((bucketPrefix).length), (oErr, subData) => {
+            let recursiveCall = getObjectList(subPrefix.Prefix.substring((bucketPrefix).length), (oErr, subData) => {
               next(null, subData);
             });
+            console.log(recursiveCall);
           }, (mapErr, results) => {
             cb(null, _.flatten(results));
           });
@@ -264,4 +270,68 @@ module.exports.getFiles = (day, month, year) => {
         .on('finish', () => { console.log(`${outputzip} is ready!`) }));
     })
 
+}
+
+module.exports.getFile = {
+  (day, month, year) => {
+
+    console.log(bucketPrefix);
+
+    d = new Date();
+
+    if(!day) day = d.getDate();
+    if(!month) month = d.getMonth() + 1; 
+    if(!year) year = d.getFullYear();
+
+    let foldername = `Barrons/${year}/${month}/${day}`.replace(/\//g, "-");
+    let outputzip = foldername + ".zip";
+    if(process.send) {
+        process.send(outputzip);
+        console.log("Sent! :)");
+    } else {
+        console.log("Output file name not sent to parent. :(");
+    }
+
+    let snapshotZip = zipper.folder(foldername);
+    let getRequests = [];
+
+    for(let i =0; i < paths.length; i++){
+
+        for(let j=0; j < endpoints.length; j++){
+
+            let key = `${bucketPrefix}Barrons/${year}/${month}/${day}/${paths[i]}/${endpoints[j]}`;
+            console.log(key)
+
+            let params = { 
+                Bucket: saveBucket,
+                Key: key
+                //StartAfter: bucketPrefix + "Barrons"
+            }
+        
+            let awsPromise = s3.getObject(params).promise();
+            getRequests.push(awsPromise);
+
+        }
+
+    }
+
+    Promise.all(getRequests).then( (responses) => {
+        for(let i=0; i < responses.length; i++){
+
+            let ref = i - Math.ceil(i / endpoints.length); //Hits every path for each endpoint.
+            console.log(ref);
+            let filename = `${paths[ref]}/${endpoints[i % endpoints.length]}`;
+            console.log(filename);
+            console.log(responses[i]);
+
+            snapshotZip.file(filename, responses[i].Body, {'binary': true}); //Screenshots and others can both be saved as binary.
+        }
+
+
+        snapshotZip.generateNodeStream({type:'nodebuffer',streamFiles:true})
+        .pipe(fs.createWriteStream(`${outputzip}`)
+        .on('finish', () => { console.log(`${outputzip} is ready!`) }));
+    })
+
+}
 }
