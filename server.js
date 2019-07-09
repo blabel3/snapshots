@@ -64,12 +64,10 @@ app.get('/date/:day?/:month?/:year?', (req, res) => {
     stdio: ['inherit', 'inherit', 'inherit', 'ipc']
   });
 
-  child.on('message', message => { zipfilename = message; } )
-
-  setTimeout( () => {
-    //Go get the zip we just made!
-    res.redirect('/download');
-  }, 1000);
+  child.on('message', message => { 
+    if(message === "Done zipping") res.redirect('/download'); //Child says the zip is ready for download, let's get it.
+    else zipfilename = message; 
+  } )
 
 });
 

@@ -229,7 +229,14 @@ module.exports.getFiles = async (day, month, year) => {
 
         snapshotZip.generateNodeStream({type:'nodebuffer',streamFiles:true})
         .pipe(fs.createWriteStream(`${outputzip}`)
-        .on('finish', () => { console.log(`${outputzip} is ready!`) }));
+        .on('finish', () => { 
+            console.log(`${outputzip} is ready!`) 
+            if(process.send) {
+                process.send("Done zipping");
+            } else {
+                console.log("Parent doesn't know how their kid is doing.. :(");
+            }
+        }));
     })
 
 }
