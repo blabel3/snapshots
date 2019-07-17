@@ -1,37 +1,78 @@
-<script src="https://code.jquery.com/jquery-3.4.1.slim.js"></script>
+<!DOCTYPE html>
+<html lang="en-US">
 
-<script src="dist/js/datepicker.min.js"></script>
-<link href="dist/css/datepicker.min.css" rel="stylesheet" type="text/css"> 
+<head>
+    <title>Snapshots</title>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.js"></script>
 
-<!-- Include English language -->
-<script src="dist/js/i18n/datepicker.en.js"></script>
+    <script src="dist/js/datepicker.min.js"></script>
+    <link href="dist/css/datepicker.min.css" rel="stylesheet" type="text/css"> 
+    <!-- Include English language -->
+    <script src="dist/js/i18n/datepicker.en.js"></script>
 
-<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" type="text/css"> 
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" type="text/css"> 
 
-<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js"></script>
+</head>
 
-<div class="content">
-    <h1>Snapshot Service</h1>
+<body>
+    <div class="content">
+        <h1>Snapshot Service</h1>
 
-    <h2>Select a Date</h2>
+        <h2>Select a Date</h2>
 
-    <div id="archive"> </div>
+        <div id="archive"> </div>
 
-    <h2>Get the Snapshot</h2>
+        <h2>Select a Product</h2>
 
-    <h3>Download Full Snapshot</h3>
-    <button onclick="downloadDate()">Download</button>
+        <div id="products" class="flex-container">
+            <label class="product" id="barrons-label" for="prod-barrons">
+                <input type="radio" id="prod-barrons" name="product" value="barrons" checked/>
+                Barrons
+            </label>
+            <label class="product" id="wsj-label" for="prod-wsj">
+                <input type="radio" id="prod-wsj" name="product" value="wsj"/>
+                WSJ
+            </label>
+            <label class="product" id="fnlondon-label" for="prod-fnlondon">
+                <input type="radio" id="prod-fnlondon" name="product" value="fnlondon"/>
+                FNLondon
+            </label>
+        </div>
 
-    <!--IMMEDIATE SCREENSHOT UI COMING AFTER FUNCTIONALITY>h3>Download Page Screenshot</h3>
-    <select id="pages">
-        <option value="penta">Penta</option>
-        <option value="home">Home</option>
-        <option value="market-data">Market Data</option>
-        <option value="advisor-center">Advisor Center</option>
-    </select>
+        <h2>Get the Snapshot</h2>
 
-    <button onclick="downloadScreenshot()">Download</button-->
+        <div class="flex-container">
+            <div style="flex-grow: 1; margin-right:10px;">
+                <h3>Download Full Snapshot</h3>
+                <button class="download" style="width:100%;" onclick="downloadDate()">Download</button>
+            </div>
 
-</div>
+            <div style="flex-grow: 1;">
+                <h3>Download Page Screenshot (WIP)</h3>
 
-<script src="main.js"></script>
+                <div class="flex-container">
+                    <select id="pages">
+                        <option value="penta">Penta</option>
+                        <option value="home">Home</option>
+                        <option value="market-data">Market Data</option>
+                        <option value="advisor-center">Advisor Center</option>
+                    </select>
+                    <select id="breakpoints">
+                        <option value="4u">4u</option>
+                        <option value="8u">8u</option>
+                        <option value="12u">12u</option>
+                        <option value="16u">16u</option>
+                    </select>
+                    <button class="download" onclick="downloadScreenshot()" style="flex-grow: 2; ">Download</button-->
+                </div>
+            </div>
+
+            
+        </div>
+
+    </div>
+</body>
+
+</html>

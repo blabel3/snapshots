@@ -1,6 +1,18 @@
-[
-    "penta",
-    "homepage",
-    "market-data",
-    "advisorcenter"
-]
+{
+    "barrons": [
+        "penta",
+        "homepage",
+        "market-data",
+        "advisorcenter"
+    ],
+    "wsj": [
+        "news/politics",
+        "news/magazine",
+        "video"
+    ],
+    "fnlondon": [
+        "news",
+        "people"
+    ]
+
+}

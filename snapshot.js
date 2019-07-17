@@ -14,7 +14,6 @@ const zip = require('jszip');
 //Initilization 
 let saveBucket = process.env.SERVO_S3_BUCKET;
 let bucketPrefix = process.env.SERVO_S3_KEY_PREFIX;
-const host = "https://www.barrons.com";
 
 let d, dateAppend;
 var zipper = new zip();
@@ -37,6 +36,52 @@ if(!process.env.SERVO_S3_BUCKET) {
 
 let s3 = new aws.S3(config);
 
+let formatDate = (date) => {
+    return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+}
+
+let getDisplayName = product => {
+    switch(product){
+        case "barrons": return "Barrons";
+        case "wsj": return "WSJ"; 
+        case "fnlondon": return "FNLondon"; 
+        default: console.log("No display name set, assuming you want it all lowercase.");
+    }
+    return product;
+}
+
+//Sets variable from JSON data in S3 Bucket
+let setZipPages = async (file, day, month, year, hostDisplayName) => {
+
+    let params = {
+        Bucket: saveBucket,
+        Key: `${bucketPrefix}${hostDisplayName}/${year}/${month}/${day}/${file}.json`
+    }
+
+    let promise = s3.getObject(params).promise();
+    let recievedSettings = await promise;
+
+    let settings = recievedSettings.Body.toString().split(",");
+
+    console.log(settings);
+    return settings;
+
+}
+
+let saveJSON = (object, dateAppend, fileName, host) => {    
+    let saveParams = {
+        Body: object.toString(),
+        Bucket: saveBucket,
+        Key: `${bucketPrefix}${getDisplayName(host)}/${dateAppend}/${fileName}.json`,
+        ContentType: "application/json"
+    }
+
+    s3.putObject(saveParams, (error, data) => {
+        if (error) console.error(error); 
+        //data is just the Etag and the versionID. We don't need to do anything with it.
+    })
+}
+
 //get screenshots
 let browser = async () => {
 
@@ -44,32 +89,45 @@ let browser = async () => {
     const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
     const page = await browser.newPage();
 
-    for(let i = 0; i < paths.length; i++){
+    let targets = Object.entries(paths);
+    let numOfBreakpoints = Object.entries(breakpoints).length;
 
-        let units = Object.keys(breakpoints);
+    for(let hostIndex = 0; hostIndex < targets.length; hostIndex++){
 
-        for(let j = 0; j < units.length; j++) { //4 breakpoints
-            process.stdout.write(`Screenshotting ${host}/${paths[i]}... @${units[j]} `);
-            await page.setViewport({width: Object.values(breakpoints)[j], height: 1080});
-            await page.goto(`${host}/${paths[i]}`, {waitUntil: 'load', timeout: 0});
-            console.log('✓ Done!');
-            let screenshot = await page.screenshot({fullPage: true});
-            
-            let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[j]}`; // ex. Barrons/penta/screenshots
-            console.log(`  KEY: ${key}`);
+        let host = `https://www.${targets[hostIndex][0]}.com`;
+        let hostDisplayName = getDisplayName(targets[hostIndex][0]);
 
-            let screenshotStoreParams = {
-                Body: screenshot,
-                Bucket: saveBucket,
-                Key: key,
-                ContentType: "image/png"
+        let pages = targets[hostIndex][1];
+        
+        console.log(host);
+        console.log(pages);
+
+        for(let pageIndex = 0; pageIndex < pages.length; pageIndex++){
+    
+            for(let breakpointIndex = 0; breakpointIndex < numOfBreakpoints; breakpointIndex++) { //4 breakpoints
+                process.stdout.write(`Screenshotting ${host}/${pages[pageIndex]}... @${Object.keys(breakpoints)[breakpointIndex]} `);
+                await page.setViewport({width: Object.values(breakpoints)[breakpointIndex], height: 1080});
+                await page.goto(`${host}/${pages[pageIndex]}`, {waitUntil: 'load', timeout: 0});
+                console.log('✓ Done!');
+                let screenshot = await page.screenshot({fullPage: true});
+                
+                let key = `${bucketPrefix}${hostDisplayName}/${dateAppend}/${pages[pageIndex]}/${endpoints[breakpointIndex]}`; // ex. Barrons/penta/screenshots
+                console.log(`  KEY: ${key}`);
+    
+                let screenshotStoreParams = {
+                    Body: screenshot,
+                    Bucket: saveBucket,
+                    Key: key,
+                    ContentType: "image/png"
+                }
+    
+                s3.putObject(screenshotStoreParams, (error, data) => {
+                    if (error) console.error(error); 
+                    //data is just the Etag and the versionID. We don't need to do anything with it.
+                });
+    
             }
-
-            s3.putObject(screenshotStoreParams, (error, data) => {
-                if (error) console.error(error); 
-                //data is just the Etag and the versionID. We don't need to do anything with it.
-            });
-
+    
         }
 
     }
@@ -83,15 +141,27 @@ let resources = () => {
 
     let requests = [];
 
+    let targets = Object.entries(paths);
+
     //Set up all requests we need
-    for(let i = 0; i < paths.length; i++){
+    for(let hostIndex = 0; hostIndex < targets.length; hostIndex++){
 
-        let request = axios.get(`${host}/${paths[i]}`, {
-            headers: { 'CF-CACHE-TAG': process.env.CF_CACHE_TAG ? process.env.CF_CACHE_TAG : 'test' }
-        });
+        let host = `https://www.${targets[hostIndex][0]}.com`;;
+        let pages = targets[hostIndex][1];
 
-        requests.push(request);
+        console.log(host);
+        console.log(pages);
 
+        for(let pageIndex = 0; pageIndex < pages.length; pageIndex++){
+
+            let request = axios.get(`${host}/${pages[pageIndex]}`, {
+                headers: { 'CF-CACHE-TAG': process.env.CF_CACHE_TAG ? process.env.CF_CACHE_TAG : 'test' }
+            });
+
+            requests.push(request);
+
+        }
+    
     }
 
     console.log("Making all HTTP requests for resources...")
@@ -101,13 +171,20 @@ let resources = () => {
 
         console.log("Resources obtained!");
 
-        for(let i = 0; i < responses.length; i++){
-            let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[endpoints.length-1]}`;
+        let hostIndex = 0, pageIndex = 0;
+        let hosts = Object.keys(paths);
+
+        for(let responseIndex = 0; responseIndex < responses.length; responseIndex++){
+            let pages = targets[hostIndex][1];
+
+            let hostDisplayName = getDisplayName(hosts[hostIndex]);
+
+            let key = `${bucketPrefix}${hostDisplayName}/${dateAppend}/${pages[pageIndex]}/${endpoints[endpoints.length-1]}`;
 
             console.log(`Storing file: ${key}`);
 
             let resourceStoreParams = {
-                Body: responses[i].data,
+                Body: responses[responseIndex].data,
                 Bucket: saveBucket,
                 Key:  key, 
                 ContentType: "text/html"
@@ -117,29 +194,18 @@ let resources = () => {
                 if (error) console.error(error); 
                 //data is just the Etag and the versionID. We don't need to do anything with it.
             })
+
+            pageIndex++;
+            if(pageIndex >= Object.values(paths)[hostIndex].length){
+                pageIndex =0;
+                hostIndex++;
+            }
+
         }
 
     }).then(() => { 
         console.log('Snapshot taken!') 
     });
-}
-
-let formatDate = (date) => {
-    return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
-}
-
-let saveJSON = (object, dateAppend, fileName) => {
-    let saveParams = {
-        Body: object.toString(),
-        Bucket: saveBucket,
-        Key: `${bucketPrefix}Barrons/${dateAppend}/${fileName}.json`,
-        ContentType: "application/json"
-    }
-
-    s3.putObject(saveParams, (error, data) => {
-        if (error) console.error(error); 
-        //data is just the Etag and the versionID. We don't need to do anything with it.
-    })
 }
 
 module.exports.takeSnapshot = async () => {
@@ -149,36 +215,22 @@ module.exports.takeSnapshot = async () => {
     //debugging
     console.log("SAVE BUCKET: " + saveBucket);
     console.log("BUCKET PREFIX: " + bucketPrefix);
-
-    console.log(paths);
-    console.log(endpoints);
-
-    saveJSON(paths, dateAppend, 'paths');
-    saveJSON(endpoints, dateAppend, 'endpoints');
+    
+    for(let [host, hostPaths] of Object.entries(paths)){
+        saveJSON(hostPaths, dateAppend, 'paths', host);
+        saveJSON(endpoints, dateAppend, 'endpoints', host); 
+        /* there will be multiples of these in each product's folder, this is because I decided to
+        maintain compatibility with before I added in wsj and fnlondon. A beter way to do this
+        would be to just put the paths and endpoints in the root of our bucket instead of
+        putting it in each product's bucket. But it'd look worse for the demo, and it's a miniscule issue.
+        */
+    }
 
     await browser();
     resources();
 }
 
-//Sets variable from JSON data in S3 Bucket
-let setZipPages = async (file, day, month, year) => {
-
-    let params = {
-        Bucket: saveBucket,
-        Key: `${bucketPrefix}Barrons/${year}/${month}/${day}/${file}.json`
-    }
-
-    let promise = s3.getObject(params).promise();
-    let recievedSettings = await promise;
-
-    let settings = recievedSettings.Body.toString().split(",");
-
-    console.log(settings);
-    return settings;
-
-}
-
-module.exports.getFiles = async (day, month, year) => {
+module.exports.getFiles = async (day, month, year, product) => {
 
     console.log(bucketPrefix);
 
@@ -188,12 +240,18 @@ module.exports.getFiles = async (day, month, year) => {
     if(!month) month = d.getMonth() + 1; 
     if(!year) year = d.getFullYear();
 
+    if(!product) product = "barrons"; //default to Barron's because we're the coolest :)
+    
+    //this is nasty but they're all different ugh.
+    let displayName = getDisplayName(product);
+    
+
     //Get pages that were taken by the snapshot from S3.
-    let snapshotPaths = await setZipPages('paths', day, month, year);
-    let snapshotEndpoints = await setZipPages('endpoints', day, month, year);
+    let snapshotPaths = await setZipPages('paths', day, month, year, displayName);
+    let snapshotEndpoints = await setZipPages('endpoints', day, month, year, displayName);
 
     //Set up output zip.
-    let foldername = `Barrons/${year}/${month}/${day}`.replace(/\//g, "-");
+    let foldername = `${displayName}/${year}/${month}/${day}`.replace(/\//g, "-");
     let outputzip = foldername + ".zip";
     if(process.send) {
         process.send(outputzip);
@@ -209,7 +267,7 @@ module.exports.getFiles = async (day, month, year) => {
 
         for(let j=0; j < snapshotEndpoints.length; j++){
 
-            let key = `${bucketPrefix}Barrons/${year}/${month}/${day}/${snapshotPaths[i]}/${snapshotEndpoints[j]}`;
+            let key = `${bucketPrefix}${displayName}/${year}/${month}/${day}/${snapshotPaths[i]}/${snapshotEndpoints[j]}`;
             console.log(`Request: ${key}`)
 
             let params = { 
