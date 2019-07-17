@@ -1,6 +1,7 @@
 //Internal dependencies
 const paths = require('./data/paths');
 const endpoints = require('./data/endpoints');
+const breakpoints = require('./data/breakpoints');
 
 //External dependencies
 const async = require('async');
@@ -44,25 +45,32 @@ let browser = async () => {
     const page = await browser.newPage();
 
     for(let i = 0; i < paths.length; i++){
-        process.stdout.write(`Screenshotting ${i} (${host}/${paths[i]})... `);
-        await page.goto(`${host}/${paths[i]}`);
-        console.log('✓ Done!');
-        let screenshot = await page.screenshot({fullPage: true});
-        
-        let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[0]}`; // ex. Barrons/penta/screenshots
-        console.log(`  Screenshot KEY: ${key}`);
 
-        let screenshotStoreParams = {
-            Body: screenshot,
-            Bucket: saveBucket,
-            Key: key,
-            ContentType: "image/png"
+        let units = Object.keys(breakpoints);
+
+        for(let j = 0; j < units.length; j++) { //4 breakpoints
+            process.stdout.write(`Screenshotting ${host}/${paths[i]}... @${units[j]} `);
+            await page.setViewport({width: Object.values(breakpoints)[j], height: 1080});
+            await page.goto(`${host}/${paths[i]}`, {waitUntil: 'load', timeout: 0});
+            console.log('✓ Done!');
+            let screenshot = await page.screenshot({fullPage: true});
+            
+            let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[j]}`; // ex. Barrons/penta/screenshots
+            console.log(`  KEY: ${key}`);
+
+            let screenshotStoreParams = {
+                Body: screenshot,
+                Bucket: saveBucket,
+                Key: key,
+                ContentType: "image/png"
+            }
+
+            s3.putObject(screenshotStoreParams, (error, data) => {
+                if (error) console.error(error); 
+                //data is just the Etag and the versionID. We don't need to do anything with it.
+            });
+
         }
-
-        s3.putObject(screenshotStoreParams, (error, data) => {
-            if (error) console.error(error); 
-            //data is just the Etag and the versionID. We don't need to do anything with it.
-        });
 
     }
 
@@ -94,7 +102,7 @@ let resources = () => {
         console.log("Resources obtained!");
 
         for(let i = 0; i < responses.length; i++){
-            let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[1]}`;
+            let key = `${bucketPrefix}Barrons/${dateAppend}/${paths[i]}/${endpoints[endpoints.length-1]}`;
 
             console.log(`Storing file: ${key}`);
 
@@ -217,14 +225,24 @@ module.exports.getFiles = async (day, month, year) => {
     }
 
     Promise.all(getRequests).then( (responses) => {
-        for(let i=0; i < responses.length; i++){
 
-            let ref = i - Math.ceil(i / snapshotEndpoints.length); //Hits every path for each endpoint.
-            let filename = `${snapshotPaths[ref]}/${snapshotEndpoints[i % snapshotEndpoints.length]}`;
+        let pathIndex = 0, endpointIndex = 0;
+
+        for(let responseNumber = 0; responseNumber < responses.length; responseNumber++){
+
+            let filename = `${snapshotPaths[pathIndex]}/${snapshotEndpoints[endpointIndex]}`;
             process.stdout.write(`Zipping ${filename}... `);
 
-            snapshotZip.file(filename, responses[i].Body, {'binary': true}); //Screenshots and others can both be saved as binary.
+            snapshotZip.file(filename, responses[responseNumber].Body, {'binary': true}); //Screenshots and others can both be saved as binary.
             console.log('✓ Done!');
+
+            //iterates through each endpoint for every path, matching the requests. 
+            endpointIndex++; 
+            if(endpointIndex >= snapshotEndpoints.length){ 
+                endpointIndex = 0; 
+                pathIndex++; 
+            } 
+
         }
 
         snapshotZip.generateNodeStream({type:'nodebuffer',streamFiles:true})
