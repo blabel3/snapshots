@@ -14,7 +14,7 @@ const zip = require('jszip');
 //Initilization 
 let saveBucket = process.env.SERVO_S3_BUCKET;
 let bucketPrefix = process.env.SERVO_S3_KEY_PREFIX;
-const host = "https://www.barrons.com";
+let host = "https://www.barrons.com";
 
 let d, dateAppend;
 var zipper = new zip();
@@ -178,7 +178,7 @@ let setZipPages = async (file, day, month, year) => {
 
 }
 
-module.exports.getFiles = async (day, month, year) => {
+module.exports.getFiles = async (day, month, year, product) => {
 
     console.log(bucketPrefix);
 
@@ -188,12 +188,23 @@ module.exports.getFiles = async (day, month, year) => {
     if(!month) month = d.getMonth() + 1; 
     if(!year) year = d.getFullYear();
 
+    if(!product) product = "barrons"; //default to Barron's because we're the coolest :)
+    
+    //this is nasty but they're all different ugh.
+    let displayName;
+    switch(product){
+        case "barrons": displayName = "Barrons"; break;
+        case "wsj": displayName = "WSJ"; break;
+        case "fnlondon": displayName = "FNLondon"; break; 
+        default: console.log("No display name set, assuming you want it all lowercase.");
+    }
+
     //Get pages that were taken by the snapshot from S3.
     let snapshotPaths = await setZipPages('paths', day, month, year);
     let snapshotEndpoints = await setZipPages('endpoints', day, month, year);
 
     //Set up output zip.
-    let foldername = `Barrons/${year}/${month}/${day}`.replace(/\//g, "-");
+    let foldername = `${displayName}/${year}/${month}/${day}`.replace(/\//g, "-");
     let outputzip = foldername + ".zip";
     if(process.send) {
         process.send(outputzip);
@@ -209,7 +220,7 @@ module.exports.getFiles = async (day, month, year) => {
 
         for(let j=0; j < snapshotEndpoints.length; j++){
 
-            let key = `${bucketPrefix}Barrons/${year}/${month}/${day}/${snapshotPaths[i]}/${snapshotEndpoints[j]}`;
+            let key = `${bucketPrefix}${displayName}/${year}/${month}/${day}/${snapshotPaths[i]}/${snapshotEndpoints[j]}`;
             console.log(`Request: ${key}`)
 
             let params = { 

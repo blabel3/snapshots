@@ -38,8 +38,10 @@ $(document).ready( () => {
 function downloadDate() {
     let dirtyDate = document.getElementById("archive").value;
     let date = dirtyDate.split(" ").map( numberString => parseInt(numberString)); //ensures we have actual date numbers. No zeroes throwing stuff off either. 
-    console.log(`Going to /date/${date[0]}/${date[1]}/${date[2]}...`);
-    window.location.replace(`/date/${date[0]}/${date[1]}/${date[2]}`);
+    let product = $(" input[name='product']:checked").val();
+    console.log(product);
+    console.log(`Going to /date/${date[0]}/${date[1]}/${date[2]}/${product}...`);
+    window.location.replace(`/date/${date[0]}/${date[1]}/${date[2]}/${product}`);
 }
 
 function downloadScreenshot() {

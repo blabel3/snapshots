@@ -47,19 +47,21 @@ app.get('/today', (req, res) => {
 
 });
 
-app.get('/date/:day?/:month?/:year?', (req, res) => {
+app.get('/date/:day?/:month?/:year?/:product?', (req, res) => {
 
   let day = req.params.day;
   let month = req.params.month;
   let year = req.params.year;
+  let product = req.params.product;
 
   if(req.body){
     console.log(body);
   }
 
   console.log(`${day}, ${month}, ${year}`);
+  console.log(`"${product}"`);
 
-  const child = spawn('node', ['-e', `require("./snapshot").getFiles(${day}, ${month}, ${year})`], {
+  const child = spawn('node', ['-e', `require("./snapshot").getFiles(${day}, ${month}, ${year}, "${product}")`], {
     detached: true,
     stdio: ['inherit', 'inherit', 'inherit', 'ipc']
   });
