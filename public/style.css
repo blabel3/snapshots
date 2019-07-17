@@ -67,6 +67,11 @@ h1 {
     cursor: pointer;
 }
 
+select {
+    margin: 8px 0px;
+    height: 100%;
+}
+
 #pages {
     flex-grow: 4;
     margin-right:2.5%;
