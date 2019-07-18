@@ -51,11 +51,11 @@ let getDisplayName = product => {
 }
 
 //Sets variable from JSON data in S3 Bucket
-let setZipPages = async (file, day, month, year, hostDisplayName) => {
+let setZipPages = async (file, day, month, year, domainDisplayName) => {
 
     let params = {
         Bucket: saveBucket,
-        Key: `${bucketPrefix}${hostDisplayName}/${year}/${month}/${day}/${file}.json`
+        Key: `${bucketPrefix}${domainDisplayName}/${year}/${month}/${day}/${file}.json`
     }
 
     let promise = s3.getObject(params).promise();
@@ -68,11 +68,11 @@ let setZipPages = async (file, day, month, year, hostDisplayName) => {
 
 }
 
-let saveJSON = (object, dateAppend, fileName, host) => {    
+let saveJSON = (object, dateAppend, fileName, domain) => {    
     let saveParams = {
         Body: object.toString(),
         Bucket: saveBucket,
-        Key: `${bucketPrefix}${getDisplayName(host)}/${dateAppend}/${fileName}.json`,
+        Key: `${bucketPrefix}${getDisplayName(domain)}/${dateAppend}/${fileName}.json`,
         ContentType: "application/json"
     }
 
@@ -89,29 +89,32 @@ let browser = async () => {
     const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
     const page = await browser.newPage();
 
-    let targets = Object.entries(paths);
+    let sites = Object.entries(paths);
     let numOfBreakpoints = Object.entries(breakpoints).length;
 
-    for(let hostIndex = 0; hostIndex < targets.length; hostIndex++){
+    for(let domainIndex = 0; domainIndex < sites.length; domainIndex++){
 
-        let host = `https://www.${targets[hostIndex][0]}.com`;
-        let hostDisplayName = getDisplayName(targets[hostIndex][0]);
+        let domain = `https://www.${sites[domainIndex][0]}.com`;
+        let domainDisplayName = getDisplayName(sites[domainIndex][0]);
 
-        let pages = targets[hostIndex][1];
+        let pages = sites[domainIndex][1];
         
-        console.log(host);
+        console.log(domain);
         console.log(pages);
 
         for(let pageIndex = 0; pageIndex < pages.length; pageIndex++){
+
+            let breakpointNames = Object.keys(breakpoints);
+            let breakpointWidths = Object.values(breakpoints);
     
             for(let breakpointIndex = 0; breakpointIndex < numOfBreakpoints; breakpointIndex++) { //4 breakpoints
-                process.stdout.write(`Screenshotting ${host}/${pages[pageIndex]}... @${Object.keys(breakpoints)[breakpointIndex]} `);
-                await page.setViewport({width: Object.values(breakpoints)[breakpointIndex], height: 1080});
-                await page.goto(`${host}/${pages[pageIndex]}`, {waitUntil: 'load', timeout: 0});
+                process.stdout.write(`Screenshotting ${domain}/${pages[pageIndex]}... @${breakpointNames[breakpointIndex]} `);
+                await page.setViewport({width: breakpointWidths[breakpointIndex], height: 1080});
+                await page.goto(`${domain}/${pages[pageIndex]}`, {waitUntil: 'load', timeout: 0});
                 console.log('✓ Done!');
                 let screenshot = await page.screenshot({fullPage: true});
                 
-                let key = `${bucketPrefix}${hostDisplayName}/${dateAppend}/${pages[pageIndex]}/${endpoints[breakpointIndex]}`; // ex. Barrons/penta/screenshots
+                let key = `${bucketPrefix}${domainDisplayName}/${dateAppend}/${pages[pageIndex]}/${endpoints[breakpointIndex]}`; // ex. Barrons/penta/screenshots
                 console.log(`  KEY: ${key}`);
     
                 let screenshotStoreParams = {
@@ -141,20 +144,20 @@ let resources = () => {
 
     let requests = [];
 
-    let targets = Object.entries(paths);
+    let sites = Object.entries(paths);
 
     //Set up all requests we need
-    for(let hostIndex = 0; hostIndex < targets.length; hostIndex++){
+    for(let domainIndex = 0; domainIndex < targets.length; domainIndex++){
 
-        let host = `https://www.${targets[hostIndex][0]}.com`;;
-        let pages = targets[hostIndex][1];
+        let domain = `https://www.${sites[domainIndex][0]}.com`;;
+        let pages = targets[domainIndex][1];
 
-        console.log(host);
+        console.log(domain);
         console.log(pages);
 
         for(let pageIndex = 0; pageIndex < pages.length; pageIndex++){
 
-            let request = axios.get(`${host}/${pages[pageIndex]}`, {
+            let request = axios.get(`${domain}/${pages[pageIndex]}`, {
                 headers: { 'CF-CACHE-TAG': process.env.CF_CACHE_TAG ? process.env.CF_CACHE_TAG : 'test' }
             });
 
@@ -171,15 +174,15 @@ let resources = () => {
 
         console.log("Resources obtained!");
 
-        let hostIndex = 0, pageIndex = 0;
-        let hosts = Object.keys(paths);
+        let domainIndex = 0, pageIndex = 0;
+        let domains = Object.keys(paths);
 
         for(let responseIndex = 0; responseIndex < responses.length; responseIndex++){
-            let pages = targets[hostIndex][1];
+            let pages = targets[domainIndex][1];
 
-            let hostDisplayName = getDisplayName(hosts[hostIndex]);
+            let domainDisplayName = getDisplayName(domains[domainIndex]);
 
-            let key = `${bucketPrefix}${hostDisplayName}/${dateAppend}/${pages[pageIndex]}/${endpoints[endpoints.length-1]}`;
+            let key = `${bucketPrefix}${domainDisplayName}/${dateAppend}/${pages[pageIndex]}/${endpoints[endpoints.length-1]}`;
 
             console.log(`Storing file: ${key}`);
 
@@ -196,9 +199,9 @@ let resources = () => {
             })
 
             pageIndex++;
-            if(pageIndex >= Object.values(paths)[hostIndex].length){
+            if(pageIndex >= Object.values(paths)[domainIndex].length){
                 pageIndex =0;
-                hostIndex++;
+                domainIndex++;
             }
 
         }
@@ -216,9 +219,9 @@ module.exports.takeSnapshot = async () => {
     console.log("SAVE BUCKET: " + saveBucket);
     console.log("BUCKET PREFIX: " + bucketPrefix);
     
-    for(let [host, hostPaths] of Object.entries(paths)){
-        saveJSON(hostPaths, dateAppend, 'paths', host);
-        saveJSON(endpoints, dateAppend, 'endpoints', host); 
+    for(let [domain, pages] of Object.entries(paths)){
+        saveJSON(pages, dateAppend, 'paths', domain);
+        saveJSON(endpoints, dateAppend, 'endpoints', domain); 
         /* there will be multiples of these in each product's folder, this is because I decided to
         maintain compatibility with before I added in wsj and fnlondon. A beter way to do this
         would be to just put the paths and endpoints in the root of our bucket instead of
@@ -245,7 +248,6 @@ module.exports.getFiles = async (day, month, year, product) => {
     //this is nasty but they're all different ugh.
     let displayName = getDisplayName(product);
     
-
     //Get pages that were taken by the snapshot from S3.
     let snapshotPaths = await setZipPages('paths', day, month, year, displayName);
     let snapshotEndpoints = await setZipPages('endpoints', day, month, year, displayName);
