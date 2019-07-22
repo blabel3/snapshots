@@ -16,7 +16,7 @@
     <script src="main.js"></script>
 </head>
 
-<body>
+<body class="smooth-fade">
     <div class="content">
         <h1>Snapshot Service</h1>
 
@@ -46,26 +46,26 @@
         <div class="flex-container">
             <div style="flex-grow: 1; margin-right:10px;">
                 <h3>Download Full Snapshot</h3>
-                <button class="download" style="width:100%;" onclick="downloadDate()">Download</button>
+                <button class="download smooth-fade" style="width:100%;" onclick="downloadDate()">Download</button>
             </div>
 
             <div style="flex-grow: 1;">
                 <h3>Download Page Screenshot (WIP)</h3>
 
                 <div class="flex-container">
-                    <select id="pages">
+                    <select id="pages" class="smooth-fade">
                         <option value="penta">Penta</option>
                         <option value="home">Home</option>
                         <option value="market-data">Market Data</option>
                         <option value="advisor-center">Advisor Center</option>
                     </select>
-                    <select id="breakpoints">
+                    <select id="breakpoints" class="smooth-fade">
                         <option value="4u">4u</option>
                         <option value="8u">8u</option>
                         <option value="12u">12u</option>
                         <option value="16u">16u</option>
                     </select>
-                    <button class="download" onclick="downloadScreenshot()" style="flex-grow: 2; ">Download</button>
+                    <button class="download smooth-fade" onclick="downloadScreenshot()" style="flex-grow: 2; ">Download</button>
                 </div>
             </div>
 

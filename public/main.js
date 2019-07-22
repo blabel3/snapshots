@@ -31,6 +31,7 @@ $(document).ready( () => {
             let color = window.getComputedStyle(label[0]).getPropertyValue('border-top-color');
             $("body").css("background-color", color);
             $(".download").css("background-color", color);
+            $("select").css("border-color", color);
         }
     }
 });
