@@ -67,8 +67,11 @@ app.get('/date/:day?/:month?/:year?/:product?', (req, res) => {
   });
 
   child.on('message', message => { 
-    if(message === "Done zipping") res.redirect('/download'); //Child says the zip is ready for download, let's get it.
-    else zipfilename = message; 
+    if(message === "Done zipping") {
+      res.redirect('/download'); //Child says the zip is ready for download, let's get it.
+    } else if (message === "Data not found") {
+      res.status(500).send('<h1>Data not found for that snapshot :(</h1>'); 
+    } else zipfilename = message; 
   } )
 
 });

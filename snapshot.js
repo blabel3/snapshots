@@ -34,13 +34,13 @@ if(!process.env.SERVO_S3_BUCKET) {
     bucketPrefix = '';
 }
 
-let s3 = new aws.S3(config);
+const s3 = new aws.S3(config);
 
-let formatDate = (date) => {
+const formatDate = (date) => {
     return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 }
 
-let getDisplayName = product => {
+const getDisplayName = product => {
     switch(product){
         case "barrons": return "Barrons";
         case "wsj": return "WSJ"; 
@@ -51,39 +51,49 @@ let getDisplayName = product => {
 }
 
 //Sets variable from JSON data in S3 Bucket
-let setZipPages = async (file, day, month, year, domainDisplayName) => {
+const setZipData = async (file, day, month, year, domainDisplayName) => {
 
     let params = {
         Bucket: saveBucket,
         Key: `${bucketPrefix}${domainDisplayName}/${year}/${month}/${day}/${file}.json`
     }
 
-    let promise = s3.getObject(params).promise();
+    let promise = s3.getObject(params).promise().catch(error => {return error});
     let recievedSettings = await promise;
-
     let settings = recievedSettings.Body.toString().split(",");
-
+        
     console.log(settings);
     return settings;
 
 }
 
-let saveJSON = (object, dateAppend, fileName, domain) => {    
-    let saveParams = {
-        Body: object.toString(),
-        Bucket: saveBucket,
-        Key: `${bucketPrefix}${getDisplayName(domain)}/${dateAppend}/${fileName}.json`,
-        ContentType: "application/json"
+const uploadFile = (body, key) => {
+    let extension = key.substring(key.indexOf('.'));
+    let contentType;
+    switch(extension){
+        case '.html': contentType = "text/html";        break;
+        case '.js':   contentType = "text/javascript";  break;
+        case '.css':  contentType = "text/css";         break;
+        case '.png':  contentType = "image/png";        break;
+        case '.json': contentType = "application/json"; break;
     }
 
-    s3.putObject(saveParams, (error, data) => {
+    console.log(`  KEY: ${key}`);
+    let screenshotStoreParams = {
+        Body: body,
+        Bucket: saveBucket,
+        Key: key,
+        ContentType: contentType
+    }
+
+    s3.putObject(screenshotStoreParams, (error, data) => {
         if (error) console.error(error); 
         //data is just the Etag and the versionID. We don't need to do anything with it.
-    })
+    });
 }
 
 //get screenshots
-let browser = async () => {
+const browser = async () => {
 
     //Takes screenshot
     const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
@@ -115,19 +125,8 @@ let browser = async () => {
                 let screenshot = await page.screenshot({fullPage: true});
                 
                 let key = `${bucketPrefix}${domainDisplayName}/${dateAppend}/${pages[pageIndex]}/${endpoints[breakpointIndex]}`; // ex. Barrons/penta/screenshots
-                console.log(`  KEY: ${key}`);
-    
-                let screenshotStoreParams = {
-                    Body: screenshot,
-                    Bucket: saveBucket,
-                    Key: key,
-                    ContentType: "image/png"
-                }
-    
-                s3.putObject(screenshotStoreParams, (error, data) => {
-                    if (error) console.error(error); 
-                    //data is just the Etag and the versionID. We don't need to do anything with it.
-                });
+                
+                uploadFile(screenshot, key);
     
             }
     
@@ -140,29 +139,24 @@ let browser = async () => {
 };
 
 //Gets CSS/HTML/JS 
-let resources = () => {
+const resources = () => {
 
     let requests = [];
 
     let sites = Object.entries(paths);
 
     //Set up all requests we need
-    for(let domainIndex = 0; domainIndex < targets.length; domainIndex++){
+    for(let domainIndex = 0; domainIndex < sites.length; domainIndex++){
 
-        let domain = `https://www.${sites[domainIndex][0]}.com`;;
-        let pages = targets[domainIndex][1];
+        let domain = `https://www.${sites[domainIndex][0]}.com`;
+        let pages = sites[domainIndex][1];
 
         console.log(domain);
         console.log(pages);
 
         for(let pageIndex = 0; pageIndex < pages.length; pageIndex++){
-
-            let request = axios.get(`${domain}/${pages[pageIndex]}`, {
-                headers: { 'CF-CACHE-TAG': process.env.CF_CACHE_TAG ? process.env.CF_CACHE_TAG : 'test' }
-            });
-
+            let request = axios.get(`${domain}/${pages[pageIndex]}`).catch( error => { return error });
             requests.push(request);
-
         }
     
     }
@@ -178,25 +172,16 @@ let resources = () => {
         let domains = Object.keys(paths);
 
         for(let responseIndex = 0; responseIndex < responses.length; responseIndex++){
-            let pages = targets[domainIndex][1];
-
+            let pages = sites[domainIndex][1];
             let domainDisplayName = getDisplayName(domains[domainIndex]);
 
-            let key = `${bucketPrefix}${domainDisplayName}/${dateAppend}/${pages[pageIndex]}/${endpoints[endpoints.length-1]}`;
-
-            console.log(`Storing file: ${key}`);
-
-            let resourceStoreParams = {
-                Body: responses[responseIndex].data,
-                Bucket: saveBucket,
-                Key:  key, 
-                ContentType: "text/html"
+            if(responses[responseIndex].data){
+                let key = `${bucketPrefix}${domainDisplayName}/${dateAppend}/${pages[pageIndex]}/${endpoints[endpoints.length-1]}`;
+                uploadFile(responses[responseIndex].data, key);
+            } else {
+                console.error(`${domainDisplayName}'s site at ${pages[pageIndex]} didn't give us the HTML.`);
             }
-
-            s3.putObject(resourceStoreParams, (error, data) => {
-                if (error) console.error(error); 
-                //data is just the Etag and the versionID. We don't need to do anything with it.
-            })
+            
 
             pageIndex++;
             if(pageIndex >= Object.values(paths)[domainIndex].length){
@@ -220,8 +205,8 @@ module.exports.takeSnapshot = async () => {
     console.log("BUCKET PREFIX: " + bucketPrefix);
     
     for(let [domain, pages] of Object.entries(paths)){
-        saveJSON(pages, dateAppend, 'paths', domain);
-        saveJSON(endpoints, dateAppend, 'endpoints', domain); 
+        uploadFile(pages.toString(), `${bucketPrefix}${getDisplayName(domain)}/${dateAppend}/paths.json`);
+        uploadFile(endpoints.toString(), `${bucketPrefix}${getDisplayName(domain)}/${dateAppend}/endpoints.json`); 
         /* there will be multiples of these in each product's folder, this is because I decided to
         maintain compatibility with before I added in wsj and fnlondon. A beter way to do this
         would be to just put the paths and endpoints in the root of our bucket instead of
@@ -249,8 +234,19 @@ module.exports.getFiles = async (day, month, year, product) => {
     let displayName = getDisplayName(product);
     
     //Get pages that were taken by the snapshot from S3.
-    let snapshotPaths = await setZipPages('paths', day, month, year, displayName);
-    let snapshotEndpoints = await setZipPages('endpoints', day, month, year, displayName);
+    //Could technically be optimized by returning promises and using promise.all but since it's two calls... prioritizing readability.
+    let snapshotPages = await setZipData('paths', day, month, year, displayName).catch(error => {return error});
+    let snapshotEndpoints = await setZipData('endpoints', day, month, year, displayName).catch(error => {return error});
+
+    if(!Array.isArray(snapshotPages) || !Array.isArray(snapshotEndpoints)) {
+        console.log('Data files were not found for this snapshot.');
+        if(process.send) {
+            process.send("Data not found");
+        } else {
+            console.log("Parent doesn't know how their kid is doing.. :(");
+        }
+        return 'ERROR: NO DATA';
+    }
 
     //Set up output zip.
     let foldername = `${displayName}/${year}/${month}/${day}`.replace(/\//g, "-");
@@ -265,11 +261,14 @@ module.exports.getFiles = async (day, month, year, product) => {
     let snapshotZip = zipper.folder(foldername);
     let getRequests = [];
 
-    for(let i =0; i < snapshotPaths.length; i++){
+    console.log(snapshotPages);
+    console.log(snapshotEndpoints);
 
-        for(let j=0; j < snapshotEndpoints.length; j++){
+    for(let pageIndex=0; pageIndex < snapshotPages.length; pageIndex++){
 
-            let key = `${bucketPrefix}${displayName}/${year}/${month}/${day}/${snapshotPaths[i]}/${snapshotEndpoints[j]}`;
+        for(let endpointIndex=0; endpointIndex < snapshotEndpoints.length; endpointIndex++){
+
+            let key = `${bucketPrefix}${displayName}/${year}/${month}/${day}/${snapshotPages[pageIndex]}/${snapshotEndpoints[endpointIndex]}`;
             console.log(`Request: ${key}`)
 
             let params = { 
@@ -286,11 +285,11 @@ module.exports.getFiles = async (day, month, year, product) => {
 
     Promise.all(getRequests).then( (responses) => {
 
-        let pathIndex = 0, endpointIndex = 0;
+        let pageIndex = 0, endpointIndex = 0;
 
         for(let responseNumber = 0; responseNumber < responses.length; responseNumber++){
 
-            let filename = `${snapshotPaths[pathIndex]}/${snapshotEndpoints[endpointIndex]}`;
+            let filename = `${snapshotPages[pageIndex]}/${snapshotEndpoints[endpointIndex]}`;
             process.stdout.write(`Zipping ${filename}... `);
 
             snapshotZip.file(filename, responses[responseNumber].Body, {'binary': true}); //Screenshots and others can both be saved as binary.
@@ -300,7 +299,7 @@ module.exports.getFiles = async (day, month, year, product) => {
             endpointIndex++; 
             if(endpointIndex >= snapshotEndpoints.length){ 
                 endpointIndex = 0; 
-                pathIndex++; 
+                pageIndex++; 
             } 
 
         }
