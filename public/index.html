@@ -14,6 +14,39 @@
 
     <link rel="stylesheet" href="style.css">
     <script src="main.js"></script>
+
+    <script>
+        const init = () => {
+            adsBlocked( blocked => { //just runs our check and displays if ads are blocked or not.
+                if(blocked) document.getElementById('result').innerHTML = 'ads are blocked.';
+                else document.getElementById('result').innerHTML = 'ads are not blocked';
+            } );
+        }
+
+        // Checks if ads are blocked by making a request to the default google ads site.
+        // If it goes through, adblocking is off. If it gets stopped, adblocked is on. 
+        const adsBlocked = ( callback ) => {
+            let adURL = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+            var requestInit = {method: 'HEAD', mode: 'no-cors'};
+
+            let request = new Request(adURL, requestInit);
+
+            fetch(request).then( response => {
+                return response;
+            }).then( response => {
+                console.log(response);
+                callback(false);
+            }).catch( error => {
+                console.log(error);
+                callback(true);
+            })
+        }
+
+        //Checks for adblocked once page is loaded. 
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+
 </head>
 
 <body>
@@ -73,6 +106,8 @@
         </div>
 
     </div>
+
+    <p id="result">HI ADS!!</p>
 </body>
 
 </html>
