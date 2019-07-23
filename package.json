@@ -25,6 +25,7 @@
   },
   "scripts": {
     "postinstall": "cp -rf node_modules/air-datepicker/dist public/dist",
+    "pretest": "npm run lint",
     "test": "mocha",
     "lint": "eslint *.js test/*.js",
     "local": "PORT=8080 LOCAL=true npm start",
