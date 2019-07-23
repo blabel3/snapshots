@@ -1,17 +1,18 @@
 // Internal dependencies
+const links = require('./link-check')
 const screenshots = require('./screenshots')
 const storage = require('./storage')
 const control = require('../data/test-constants')
 
 // External dependencies
-const assert = require('assert').strict
+const assert = require('assert')
 
 describe('Snapshot taking', function () {
   describe('Websites are accessible', function () {
     it('Reaches all of the websites in paths.json', async function () {
-      this.slow(500)
+      this.slow(50)
       this.timeout(0) // Perhaps adjust after we know a ballpark for the sites instead of disabling
-      const reachable = await screenshots.goToSites()
+      const reachable = await links.goToSites()
       assert.equal(reachable, control.reachable)
     })
   })
@@ -38,7 +39,7 @@ describe('Snapshot taking', function () {
     })
 
     it('Stores html files', async function () {
-      this.slow(8)
+      this.slow(10)
       assert.equal(true, await storage.putInBucket(control.html))
     })
   })
