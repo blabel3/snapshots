@@ -6,15 +6,22 @@ const control = require('../data/test-constants');
 //External dependencies
 const assert = require('assert');
 
-describe('Screenshots', function() {
-    describe('Takes screenshot', function(){
+describe('Snapshot taking', function() {
+    describe('Websites are accessible', function() {
         it('Reaches all of the websites in paths.json', async function() {
-            this.timeout(0); //Perhaps adjust after we know a ballpark for the sites instead of disabling
+            this.slow(500);
+            this.timeout(5000); //Perhaps adjust after we know a ballpark for the sites instead of disabling
             let reachable = await screenshots.goToSites();
             assert.equal(reachable, control.reachable);
         });
+    })
+    describe('Takes snapshot', function(){
+        before( function (done) {
+            storage.server.run(done); //start server
+        } )
         
         it('Takes a screenshot of a webpage', async function() {
+            this.slow(1000);
             let screenshot = await screenshots.screenCapture();
             try { 
                 assert.equal(screenshot, control.screenshot2);
@@ -23,36 +30,38 @@ describe('Screenshots', function() {
                 assert.equal(screenshot, control.screenshot);
             }
         });
-    });
-    //TODO: Write tests for storage.
-    describe('Stores screenshot', function() {
-        before( function (done) {
-            storage.server.run(done); //start server
-        } )
 
-        it('Puts screenshots into storage S3 bucket', function (done) {
-            let test = (error) => {assert.equal(!error, true)}
-            storage.putInBucket(control.screenshot2, test, done);
+        it('Stores screenshot', async function () {
+            this.slow(50);
+            assert.equal(true, await storage.putInBucket(control.screenshot2))
         });
+
+        it('Stores html files', async function () {
+            this.slow(10);
+            assert.equal(true, await storage.putInBucket(control.html))
+        }); 
+
     });
 });
 
 //TODO: Write tests for File getter.
-describe('Resources (HTML/CSS/JS)', function() {
-    describe("Gets files from website's S3 bucket", function() {
-        it('Website data S3 bucket is accessible');
-
-        it('Gets files from S3 Bucket');
-    });
-
-    describe("Stores website files", function() {
-        it('Puts files into storage S3 bucket', function (done) {
-            let test = (error) => {assert.equal(!error, true)}
-            storage.putInBucket("<p>Hello World!</p>", test, done);
-        });
-
-        after( function (done) {
-            storage.server.close(done); //end server
+describe('Sending snapshot to user', function() {
+    describe('Gets files from storage', function() {
+        it('Gets screenshot file', async function() {
+            this.slow(15);
+            const screenshot = await storage.getFromBucket(control.screenshotKey)
+            assert.equal(screenshot, control.screenshot2)
         })
-    });
+
+        it('Gets html file', async function() {
+            this.slow(7);
+            const html = await storage.getFromBucket(control.htmlKey)
+            assert.equal(html, control.html)
+        })
+    })
+
+    after( function (done) {
+        storage.server.close(done); //end server
+    })
+
 });
