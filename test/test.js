@@ -5,7 +5,7 @@ const storage = require('./storage')
 const control = require('../data/test-constants')
 
 // External dependencies
-const assert = require('assert')
+const assert = require('assert').strict
 
 describe('Snapshot taking', function () {
   describe('Websites are accessible', function () {
@@ -26,10 +26,10 @@ describe('Snapshot taking', function () {
       this.slow(1000)
       const screenshot = await screenshots.screenCapture()
       try {
-        assert.equal(screenshot, control.screenshot2)
+        assert.equal(screenshot.toString(), control.screenshot2)
       } catch (error) {
         // try the other screenshot from inside the docker image
-        assert.equal(screenshot, control.screenshot)
+        assert.equal(screenshot.toString(), control.screenshot)
       }
     })
 
@@ -51,13 +51,13 @@ describe('Sending snapshot to user', function () {
     it('Gets screenshot', async function () {
       this.slow(15)
       const screenshot = await storage.getFromBucket(control.screenshotKey)
-      assert.equal(screenshot, control.screenshot2)
+      assert.equal(screenshot.toString(), control.screenshot2)
     })
 
     it('Gets html file', async function () {
       this.slow(7)
       const html = await storage.getFromBucket(control.htmlKey)
-      assert.equal(html, control.html)
+      assert.equal(html.toString(), control.html)
     })
   })
 
