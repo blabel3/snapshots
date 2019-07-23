@@ -3,31 +3,31 @@ const paths = require('../data/paths');
 //external dependencies
 const puppeteer = require('puppeteer');
 
-const host = "https://www.barrons.com"
-
-let goToSites = async () => {
+const goToSites = async () => {
   const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
   const page = await browser.newPage();
-    
-  process.stdout.write('      ');
-  for(i = 0; i < paths.length; i++){
-    process.stdout.write(`Site ${i}... `);
-    try { 
-      await page.goto(`${host}/${paths[i]}`);
-    } catch (error) {
-      console.error(error);
-      return false;
+
+  const sites = Object.entries(paths)
+
+  for (let domainIndex = 0; domainIndex < sites.length; domainIndex++) {
+    const domain = `https://www.${sites[domainIndex][0]}.com`
+    const pages = sites[domainIndex][1]
+
+    for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+      process.stdout.write(`      Going to ${domain}/${pages[pageIndex]}... `)
+      page.goto(`${domain}/${pages[pageIndex]}`, {
+        waitUntil: 'load',
+        timeout: 0
+      }).then( console.log('✓ Done!') )
+        .catch( error => { return false })
     }
   }
-
-  console.log();
-
   await browser.close();
 
   return true;
 }
 
-let screenCapture = async () => {
+const screenCapture = async () => {
   const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
   const page = await browser.newPage();
   
