@@ -2,7 +2,7 @@
   "name": "snapshot-service",
   "version": "1.0.0",
   "description": "Takes automated snapshots of a website",
-  "main": "index.js",
+  "main": "server.js",
   "dependencies": {
     "air-datepicker": "^2.2.3",
     "aws-sdk": "^2.472.0",
@@ -25,10 +25,11 @@
   },
   "scripts": {
     "postinstall": "cp -rf node_modules/air-datepicker/dist public/dist",
+    "lint": "eslint *.js test/*.js",
     "pretest": "npm run lint",
     "test": "mocha",
-    "lint": "eslint *.js test/*.js",
-    "local": "PORT=8080 LOCAL=true npm start",
+    "prestart": "npm test",
+    "local": "PORT=8080 LOCAL=true node server.js",
     "server": "s3rver -a 127.0.0.1 -p 9001 -d /tmp/s3rver --configure-bucket test-bucket.localhost"
   },
   "repository": {
