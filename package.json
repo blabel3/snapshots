@@ -28,8 +28,7 @@
     "lint": "eslint *.js test/*.js",
     "pretest": "npm run lint",
     "test": "mocha",
-    "prestart": "npm test",
-    "local": "PORT=8080 LOCAL=true node server.js",
+    "local": "PORT=8080 LOCAL=true npm start",
     "server": "s3rver -a 127.0.0.1 -p 9001 -d /tmp/s3rver --configure-bucket test-bucket.localhost"
   },
   "repository": {
