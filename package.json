@@ -29,7 +29,7 @@
     "webpack-cli": "^3.3.6"
   },
   "scripts": {
-    "lint": "eslint *.js test/*.js",
+    "lint": "eslint *.js test/*.js frontend/*.js",
     "pretest": "npm run lint",
     "test": "mocha",
     "build": "sass frontend/styles.scss public/style.css --no-source-map && webpack",

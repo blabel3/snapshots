@@ -5,7 +5,8 @@ const { spawn } = require('child_process')
 
 // Initilization
 const app = express()
-var zipfilename
+let zipfilename
+let screenshotfilename
 
 app.use(express.static('public')) // serves files in public.
 
@@ -57,18 +58,52 @@ app.get('/date/:day?/:month?/:year?/:product?', (req, res) => {
   })
 
   child.on('message', message => {
+    console.log(message)
     if (message === 'Done zipping') {
-      res.redirect('/download') // Child says the zip is ready for download, let's get it.
+      res.redirect(`/download/zip/${zipfilename}`) // Child says the zip is ready for download, let's get it.
     } else if (message === 'Data not found') {
       res.status(500).send('<h1>Data not found for that snapshot :(</h1>')
+    } else if (message.startsWith('Zip: ')) {
+      zipfilename = message.substring('Zip: '.length)
     } else {
-      zipfilename = message
+      console.log('My baby is talking to me but alas, I do not understand.')
     }
   })
 })
 
-app.get('/download', (req, res) => {
-  res.download(`./${zipfilename}`)
+app.get('/page/:product/:breakpoint/:day/:month/:year/:webpage*', (req, res) => {
+  const day = req.params.day
+  const month = req.params.month
+  const year = req.params.year
+  const product = req.params.product
+  const webpage = req.params.webpage
+  const breakpoint = req.params.breakpoint
+
+  const child = spawn('node', ['-e', `require("./snapshot").getScreenshot(${day}, ${month}, ${year}, "${product}", "${webpage}", "${breakpoint}")`], {
+    detached: true,
+    stdio: ['inherit', 'inherit', 'inherit', 'ipc']
+  })
+
+  child.on('message', message => {
+    console.log(message)
+    if (message === 'Done downloading') {
+      res.redirect(`/download/file/${screenshotfilename}`)
+    } else if (message === 'Data not found') {
+      res.status(500).send('<h1>Data not found for that snapshot :(</h1>')
+    } else if (message.startsWith('Screenshot: ')) {
+      screenshotfilename = message.substring('Screenshot: '.length)
+    } else {
+      console.log('My baby is talking to me but alas, I do not understand.')
+    }
+  })
+})
+
+app.get('/download/file/:file', (req, res) => {
+  res.sendFile(`${__dirname}/${req.params.file}`)
+})
+
+app.get('/download/zip/:zip', (req, res) => {
+  res.download(`./${req.params.zip}`)
 })
 
 // Binding to servo specified port

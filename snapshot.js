@@ -48,27 +48,28 @@ const getDisplayName = product => {
     case 'fnlondon':
       return 'FNLondon'
     default:
-      console.log('No display name set, assuming you want it all lowercase.')
+      console.log('No display name set, assuming you want it the same.')
   }
   return product
 }
 
+module.exports.getDisplayName = getDisplayName
+
 // Sets variable from JSON data in S3 Bucket
-const setZipData = async (file, day, month, year, domainDisplayName) => {
+const getData = async (file, day, month, year, domainDisplayName) => {
+  const key = `${bucketPrefix}${domainDisplayName}/${year}/${month}/${day}/${file}`
   const params = {
     Bucket: saveBucket,
-    Key: `${bucketPrefix}${domainDisplayName}/${year}/${month}/${day}/${file}.json`
+    Key: key
   }
+
+  console.log(key)
 
   const promise = s3
     .getObject(params)
     .promise()
     .catch(error => { return error })
-  const recievedSettings = await promise
-  const settings = recievedSettings.Body.toString().split(',')
-
-  console.log(settings)
-  return settings
+  return promise
 }
 
 const uploadFile = (body, key) => {
@@ -137,12 +138,12 @@ const browser = async () => {
         })
         if (pages[pageIndex] === 'homepage') {
           await page.goto(`${domain}/`, {
-            waitUntil: 'load',
+            waitUntil: process.env.NODE_ENV === 'production' ? 'networkidle0' : 'load',
             timeout: 0
           })
         } else {
           await page.goto(`${domain}/${pages[pageIndex]}`, {
-            waitUntil: 'load',
+            waitUntil: process.env.NODE_ENV === 'production' ? 'networkidle0' : 'load',
             timeout: 0
           })
         }
@@ -151,7 +152,7 @@ const browser = async () => {
         const screenshot = await page.screenshot({ fullPage: true })
         const key = `${bucketPrefix}${domainDisplayName}/${dateAppend}/${pages[pageIndex]}/${endpoints[breakpointIndex]}` // ex. Barrons/penta/screenshots
 
-        uploadFile(screenshot, key)
+        uploadFile(screenshot, `${key}`)
       }
     }
   }
@@ -255,10 +256,13 @@ module.exports.getFiles = async (day, month, year, product) => {
 
   // Get pages that were taken by the snapshot from S3.
   // Could technically be optimized by returning promises and using promise.all but since it's two calls... prioritizing readability.
-  const snapshotPages = await setZipData('paths', day, month, year, displayName)
+  let snapshotPages = await getData('paths.json', day, month, year, displayName)
     .catch(error => { return error })
-  const snapshotEndpoints = await setZipData('endpoints', day, month, year, displayName)
+  let snapshotEndpoints = await getData('endpoints.json', day, month, year, displayName)
     .catch(error => { return error })
+
+  snapshotPages = snapshotPages.Body.toString().split(',')
+  snapshotEndpoints = snapshotEndpoints.Body.toString().split(',')
 
   if (!Array.isArray(snapshotPages) || !Array.isArray(snapshotEndpoints)) {
     console.log('Data files were not found for this snapshot.')
@@ -274,7 +278,7 @@ module.exports.getFiles = async (day, month, year, product) => {
   const foldername = `${displayName}/${year}/${month}/${day}`.replace(/\//g, '-')
   const outputzip = foldername + '.zip'
   if (process.send) {
-    process.send(outputzip)
+    process.send(`Zip: ${outputzip}`)
     console.log('Sent output filename! :)')
   } else {
     console.log('Output file name not sent to parent. :(')
@@ -333,4 +337,40 @@ module.exports.getFiles = async (day, month, year, product) => {
         })
       )
   })
+}
+
+module.exports.getScreenshot = async (day, month, year, product, page, breakpoint) => {
+  const today = new Date()
+
+  if (!day) day = today.getDate()
+  if (!month) month = today.getMonth() + 1
+  if (!year) year = today.getFullYear()
+
+  if (!product) product = 'barrons' // Default to Barron's because we're the coolest :)
+
+  // This is nasty but they're all different ugh.
+  const displayName = getDisplayName(product)
+
+  const file = `${page}/screenshots/shot${breakpoint}.png`
+  console.log(file)
+  const filename = `${product}-${page}-${year}-${month}-${day}@${breakpoint}.png`
+
+  console.log(`Writing ${filename}... `)
+  if (process.send) {
+    process.send(`Screenshot: ${filename}`)
+  } else {
+    console.log("Parent doesn't know how their kid is doing.. :(")
+  }
+
+  const data = await getData(file, day, month, year, displayName)
+  console.log(data)
+
+  fs.writeFileSync(filename, data.Body)
+
+  console.log(`${file} is ready!`)
+  if (process.send) {
+    process.send('Done downloading')
+  } else {
+    console.log("Parent doesn't know how their kid is doing.. :(")
+  }
 }
