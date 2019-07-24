@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import 'air-datepicker-en'
+import './node_modules/air-datepicker-en/dist/css/datepicker.min.css'
 
 const downloadDate = () => {
   const dirtyDate = $('#archive').val()

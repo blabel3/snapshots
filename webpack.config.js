@@ -6,6 +6,17 @@ module.exports = {
   entry: {
     main: './frontend.js'
   },
+  module: {
+      rules: [
+          {
+              test: /\.css$/,
+              use: [
+                  'style-loader',
+                  'css-loader'
+              ]
+          }
+      ]
+  },
   plugins: [
     new webpack.ProvidePlugin({
       $: 'jquery',
