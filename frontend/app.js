@@ -3,9 +3,28 @@ import 'air-datepicker-en'
 import './../node_modules/air-datepicker-en/dist/css/datepicker.min.css'
 import paths from './../data/paths.json'
 
-const downloadDate = () => {
+const getDisplayName = product => {
+  switch (product) {
+    case 'barrons':
+      return 'Barrons'
+    case 'wsj':
+      return 'WSJ'
+    case 'fnlondon':
+      return 'FNLondon'
+    default:
+      console.log('No display name set, assuming you want it the same.')
+  }
+  return product
+}
+
+const getDate = () => {
   const dirtyDate = $('#archive').val()
   const date = dirtyDate.split(' ').map(numberString => parseInt(numberString)) // Ensures we have actual date numbers. No zeroes throwing stuff off either.
+  return date
+}
+
+const downloadZip = () => {
+  const date = getDate()
   const product = $(" input[name='product']:checked").val()
   console.log(product)
   console.log(`Going to /date/${date[0]}/${date[1]}/${date[2]}/${product}...`)
@@ -14,14 +33,19 @@ const downloadDate = () => {
 }
 
 const downloadScreenshot = () => {
-  const page = $('#pages').val()
-  console.log(page)
+  const date = getDate()
+  const webpage = $('#pages').val()
+  const breakpoint = $('#breakpoints').val()
+  const product = $("input[name='product']:checked").val()
+  console.log(`${webpage} ${breakpoint} ${product}`)
+  window.history.pushState(null, 'Snapshots')
+  window.location.replace(`/page/${product}/${breakpoint}/${date[0]}/${date[1]}/${date[2]}/${webpage}`)
 }
 
-const updateDropDown = function updateDropDown() {
+const updateDropDown = function updateDropDown () {
   $('#pages').empty()
-  for (let path of paths[`${this.value}`]) {
-    let option = document.createElement('option')
+  for (const path of paths[`${this.value}`]) {
+    const option = document.createElement('option')
     option.text = path.replace('/', ' ').replace('-', ' ').split(' ').map(string => { return string.charAt(0).toUpperCase() + string.substring(1) }).join('-')
     option.value = path
     $('#pages').append(option, null)
@@ -29,12 +53,33 @@ const updateDropDown = function updateDropDown() {
 }
 
 // Make these functions available to the html
-window.downloadDate = downloadDate
+window.downloadZip = downloadZip
 window.downloadScreenshot = downloadScreenshot
-//window.updateDropDown = updateDropDown
+// window.updateDropDown = updateDropDown
 
 $(document).ready(() => {
   console.log(paths)
+
+  // Create product buttons from paths
+  for (const productName of Object.keys(paths)) {
+    const label = document.createElement('label')
+    label.classList.add('product')
+    label.id = `${productName}-label`
+    label.for = `prod-${productName}`
+
+    const input = document.createElement('input')
+    input.type = 'radio'
+    input.id = `prod-${productName}`
+    input.name = 'product'
+    input.value = productName
+
+    label.appendChild(input)
+    label.appendChild(document.createTextNode(getDisplayName(productName)))
+
+    console.log(label)
+    $('#products').append(label, null)
+  }
+  $('input:radio[name=product]:first').attr('checked', true)
 
   $("input[type=radio][name='product'").change(updateDropDown)
 
@@ -51,7 +96,7 @@ $(document).ready(() => {
     },
     onSelect: (formattedDate, date, inst) => {
       console.log(formattedDate)
-      // Changing the page screenshot dropdowns here would require getting AWS access in this js frontend. Very difficult 
+      // Changing the page screenshot dropdowns here would require getting AWS access in this js frontend. Very difficult
     }
   }).data('datepicker')
 
@@ -61,7 +106,7 @@ $(document).ready(() => {
   console.log(products)
   for (let i = 0; i < products.length; i++) {
     products[i].onchange = function () {
-      const label = $(`label[for="${products[i].id}"`)
+      const label = $('label')
       const color = window.getComputedStyle(label[0]).getPropertyValue('border-top-color')
       $('body').css('background-color', color)
       $('.download').css('background-color', color)

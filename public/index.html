@@ -20,18 +20,6 @@
         <h2>Select a Product</h2>
 
         <div id="products" class="flex-container">
-            <label class="product" id="barrons-label" for="prod-barrons">
-                <input type="radio" id="prod-barrons" name="product" value="barrons" checked/>
-                Barrons
-            </label>
-            <label class="product" id="wsj-label" for="prod-wsj">
-                <input type="radio" id="prod-wsj" name="product" value="wsj"/>
-                WSJ
-            </label>
-            <label class="product" id="fnlondon-label" for="prod-fnlondon">
-                <input type="radio" id="prod-fnlondon" name="product" value="fnlondon"/>
-                FNLondon
-            </label>
         </div>
 
         <h2>Get the Snapshot</h2>
@@ -39,11 +27,11 @@
         <div class="flex-container">
             <div style="flex-grow: 1; margin-right:10px;">
                 <h3>Download Full Snapshot</h3>
-                <button id="snapshotDownload" class="download" style="width:100%;" onclick="downloadDate()">Download</button>
+                <button id="snapshotDownload" class="download" style="width:100%;" onclick="downloadZip()">Download</button>
             </div>
 
             <div style="flex-grow: 1;">
-                <h3>Download Page Screenshot (WIP)</h3>
+                <h3>View Page Screenshot</h3>
 
                 <div class="flex-container">
                     <select id="pages" class="smooth-fade">
@@ -58,7 +46,7 @@
                         <option value="12u">12u</option>
                         <option value="16u">16u</option>
                     </select>
-                    <button id="screenshotDownload" class="download" onclick="downloadScreenshot()" style="flex-grow: 2; ">Download</button-->
+                    <button id="screenshotDownload" class="download" onclick="downloadScreenshot()" style="flex-grow: 2; ">View</button-->
                 </div>
             </div>
 
