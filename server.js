@@ -9,7 +9,7 @@ var zipfilename
 
 app.use(express.static('public', {
   setHeaders: (res, path, stat) => {
-    const extension = path.substring(key.indexOf('.'))
+    const extension = path.substring(path.indexOf('.'))
     let contentType
     switch (extension) {
       case '.html':
