@@ -8,3 +8,4 @@ jspm_packages
 
 # files built with webpack
 /public/main.js
+/public/style.css

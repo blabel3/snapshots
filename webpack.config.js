@@ -4,7 +4,7 @@ const path = require('path')
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   entry: {
-    main: './frontend.js'
+    main: './frontend/app.js'
   },
   module: {
     rules: [
