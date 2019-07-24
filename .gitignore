@@ -6,5 +6,5 @@ jspm_packages
 *.png
 *.zip
 
-# directories copied from node_modules
-public/dist
+# files built with webpack
+public/main.js
