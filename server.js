@@ -10,26 +10,8 @@ var zipfilename
 app.use(express.static('public', {
   setHeaders: (res, path, stat) => {
     const extension = path.substring(path.lastIndexOf('.'))
-    console.log(extension);
-    let contentType
-    switch (extension) {
-      case '.html':
-        contentType = 'text/html'
-        break
-      case '.js':
-        contentType = 'text/javascript'
-        break
-      case '.css':
-        contentType = 'text/css'
-        break
-      case '.png':
-        contentType = 'image/png'
-        break
-      case '.json':
-        contentType = 'application/json'
-        break
-    }
-    res.set('Content-Type', contentType)
+    console.log(extension)
+    res.type(extension)
   }
 })) // serves files in public.
 
