@@ -7,13 +7,7 @@ const { spawn } = require('child_process')
 const app = express()
 var zipfilename
 
-app.use(express.static('public', {
-  setHeaders: (res, path, stat) => {
-    const extension = path.substring(path.lastIndexOf('.'))
-    console.log(extension)
-    res.type(extension)
-  }
-})) // serves files in public.
+app.use(express.static('public')) // serves files in public.
 
 // Servo required health check
 app.get('/_health', (req, res) => {
