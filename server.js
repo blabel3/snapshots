@@ -58,7 +58,7 @@ app.get('/date/:day?/:month?/:year?/:product?', (req, res) => {
 
   child.on('message', message => {
     if (message === 'Done zipping') {
-      res.redirect('/download') // Child says the zip is ready for download, let's get it.
+      res.redirect(`/download/${zipfilename}`) // Child says the zip is ready for download, let's get it.
     } else if (message === 'Data not found') {
       res.status(500).send('<h1>Data not found for that snapshot :(</h1>')
     } else {
@@ -67,8 +67,8 @@ app.get('/date/:day?/:month?/:year?/:product?', (req, res) => {
   })
 })
 
-app.get('/download', (req, res) => {
-  res.download(`./${zipfilename}`)
+app.get('/download/:file', (req, res) => {
+  res.download(`./${req.params.file}`)
 })
 
 // Binding to servo specified port
