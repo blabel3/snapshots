@@ -6,15 +6,31 @@ const { spawn } = require('child_process')
 // Initilization
 const app = express()
 var zipfilename
-app.use(express.static('public')) // serves files in public.
 
-//Servo has content type issues
-app.use((req, res, next) => {
-  res.append('Access-Control-Allow-Origin', ['*']);
-  res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.append('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
+app.use(express.static('public', {
+  setHeaders: (res, path, stat) => {
+    const extension = path.substring(key.indexOf('.'))
+    let contentType
+    switch (extension) {
+      case '.html':
+        contentType = 'text/html'
+        break
+      case '.js':
+        contentType = 'text/javascript'
+        break
+      case '.css':
+        contentType = 'text/css'
+        break
+      case '.png':
+        contentType = 'image/png'
+        break
+      case '.json':
+        contentType = 'application/json'
+        break
+    }
+    res.set('Content-Type', contentType)
+  }
+})) // serves files in public.
 
 // Servo required health check
 app.get('/_health', (req, res) => {
