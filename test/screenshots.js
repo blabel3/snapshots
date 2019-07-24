@@ -1,43 +1,16 @@
-//Internal dependencies
-const paths = require('../data/paths');
-//external dependencies
-const puppeteer = require('puppeteer');
+// External dependencies
+const puppeteer = require('puppeteer')
 
-const host = "https://www.barrons.com"
+const screenCapture = async () => {
+  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
+  const page = await browser.newPage()
 
-let goToSites = async () => {
-  const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
-  const page = await browser.newPage();
-    
-  process.stdout.write('      ');
-  for(i = 0; i < paths.length; i++){
-    process.stdout.write(`Site ${i}... `);
-    try { 
-      await page.goto(`${host}/${paths[i]}`);
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
-  }
+  await page.goto('https://example.com')
+  var data = await page.screenshot({ encoding: 'base64', fullPage: true })
 
-  console.log();
+  await browser.close()
 
-  await browser.close();
-
-  return true;
+  return data
 }
 
-let screenCapture = async () => {
-  const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
-  const page = await browser.newPage();
-  
-  await page.goto("https://example.com");
-  var data = await page.screenshot({encoding: 'base64', fullPage: true});
-
-  await browser.close();
-
-  return data;
-}
-
-module.exports.goToSites = goToSites;
-module.exports.screenCapture = screenCapture;
+module.exports.screenCapture = screenCapture

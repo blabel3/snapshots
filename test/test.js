@@ -1,58 +1,67 @@
-//Internal dependencies
-const screenshots = require('./screenshots');
-const storage = require('./storage');
-const control = require('../data/test-constants');
+// Internal dependencies
+const links = require('./link-check')
+const screenshots = require('./screenshots')
+const storage = require('./storage')
+const control = require('../data/test-constants')
 
-//External dependencies
-const assert = require('assert');
+// External dependencies
+const assert = require('assert').strict
 
-describe('Screenshots', function() {
-    describe('Takes screenshot', function(){
-        it('Reaches all of the websites in paths.json', async function() {
-            this.timeout(0); //Perhaps adjust after we know a ballpark for the sites instead of disabling
-            let reachable = await screenshots.goToSites();
-            assert.equal(reachable, control.reachable);
-        });
-        
-        it('Takes a screenshot of a webpage', async function() {
-            let screenshot = await screenshots.screenCapture();
-            try { 
-                assert.equal(screenshot, control.screenshot2);
-            } catch (error) {
-                //try the other screenshot from inside the docker image
-                assert.equal(screenshot, control.screenshot);
-            }
-        });
-    });
-    //TODO: Write tests for storage.
-    describe('Stores screenshot', function() {
-        before( function (done) {
-            storage.server.run(done); //start server
-        } )
+describe('Snapshot taking', function () {
+  describe('Websites are accessible', function () {
+    it('Reaches all of the websites in paths.json', async function () {
+      this.slow(50)
+      this.timeout(0) // Perhaps adjust after we know a ballpark for the sites instead of disabling
+      const reachable = await links.goToSites()
+      assert.equal(reachable, control.reachable)
+    })
+  })
 
-        it('Puts screenshots into storage S3 bucket', function (done) {
-            let test = (error) => {assert.equal(!error, true)}
-            storage.putInBucket(control.screenshot2, test, done);
-        });
-    });
-});
+  describe('Takes snapshot', function () {
+    before(function (done) {
+      storage.server.run(done) // start server
+    })
 
-//TODO: Write tests for File getter.
-describe('Resources (HTML/CSS/JS)', function() {
-    describe("Gets files from website's S3 bucket", function() {
-        it('Website data S3 bucket is accessible');
+    it('Takes a screenshot of a webpage', async function () {
+      this.slow(1000)
+      const screenshot = await screenshots.screenCapture()
+      try {
+        assert.equal(screenshot.toString(), control.screenshot2)
+      } catch (error) {
+        // try the other screenshot from inside the docker image
+        assert.equal(screenshot.toString(), control.screenshot)
+      }
+    })
 
-        it('Gets files from S3 Bucket');
-    });
+    it('Stores screenshot', async function () {
+      this.slow(50)
+      assert.equal(true, await storage.putInBucket(control.screenshot2))
+    })
 
-    describe("Stores website files", function() {
-        it('Puts files into storage S3 bucket', function (done) {
-            let test = (error) => {assert.equal(!error, true)}
-            storage.putInBucket("<p>Hello World!</p>", test, done);
-        });
+    it('Stores html files', async function () {
+      this.slow(10)
+      assert.equal(true, await storage.putInBucket(control.html))
+    })
+  })
+})
 
-        after( function (done) {
-            storage.server.close(done); //end server
-        })
-    });
-});
+// TODO: Write tests for File getter.
+describe('Sending snapshot to user', function () {
+  describe('Gets files from storage', function () {
+    it('Gets screenshot', async function () {
+      this.slow(15)
+      const screenshot = await storage.getFromBucket(control.screenshotKey)
+      assert.equal(screenshot.toString(), control.screenshot2)
+    })
+
+    it('Gets html file', async function () {
+      this.slow(7)
+      const html = await storage.getFromBucket(control.htmlKey)
+      assert.equal(html.toString(), control.html)
+    })
+  })
+
+  after(function (done) {
+    storage.server.close(done) // end server
+  })
+})
