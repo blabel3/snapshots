@@ -108,5 +108,5 @@ app.get('/download/zip/:zip', (req, res) => {
 
 // Binding to servo specified port
 app.listen(process.env.PORT, () => {
-  console.log(`Snapshot-Service listening on port ${process.env.PORT}...`)
+  console.log(`Snapshot-Service listening on port ${process.env.PORT}... (http://localhost:8080)`)
 })
