@@ -8,6 +8,14 @@ const app = express()
 var zipfilename
 app.use(express.static('public')) // serves files in public.
 
+//Servo has content type issues
+app.use((req, res, next) => {
+  res.append('Access-Control-Allow-Origin', ['*']);
+  res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.append('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
 // Servo required health check
 app.get('/_health', (req, res) => {
   console.log('GET /_health 200')
