@@ -135,10 +135,17 @@ const browser = async () => {
           width: breakpointWidths[breakpointIndex],
           height: 1080
         })
-        await page.goto(`${domain}/${pages[pageIndex]}`, {
-          waitUntil: 'load',
-          timeout: 0
-        })
+        if (pages[pageIndex] === 'homepage') {
+          await page.goto(`${domain}/`, {
+            waitUntil: 'load',
+            timeout: 0
+          })
+        } else {
+          await page.goto(`${domain}/${pages[pageIndex]}`, {
+            waitUntil: 'load',
+            timeout: 0
+          })
+        }
         console.log('✓ Done!')
 
         const screenshot = await page.screenshot({ fullPage: true })
@@ -166,7 +173,12 @@ const resources = () => {
     console.log(pages)
 
     for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
-      const request = axios.get(`${domain}/${pages[pageIndex]}`).catch(error => { return error })
+      let request
+      if (pages[pageIndex] === 'homepage') {
+        request = axios.get(`${domain}/`).catch(error => { return error })
+      } else {
+        request = axios.get(`${domain}/${pages[pageIndex]}`).catch(error => { return error })
+      }
       requests.push(request)
     }
   }

@@ -12,8 +12,14 @@ const goToSites = async () => {
     const pages = sites[domainIndex][1]
 
     for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
-      const linkCheck = axios.head(`${domain}/${pages[pageIndex]}`)
-        .catch(error => { console.log(`${domain}/${pages[pageIndex]} broke... ` + error) })
+      let linkCheck
+      if (pages[pageIndex] === 'homepage') {
+        linkCheck = axios.head(`${domain}/`)
+          .catch(error => { console.log(`${domain}/${pages[pageIndex]} broke... ` + error) })
+      } else {
+        linkCheck = axios.head(`${domain}/${pages[pageIndex]}`)
+          .catch(error => { console.log(`${domain}/${pages[pageIndex]} broke... ` + error) })
+      }
       requests.push(linkCheck)
     }
   }

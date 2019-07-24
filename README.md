@@ -31,6 +31,8 @@ Other Dow Jones sites (WSJ, FNLondon) can also be selected by appending /Barrons
 
 ## Automated Snapshot Page List - from data/paths
 
+* *homepage is a special path, snapshots will just go to the domain, no addition path after that.*
+
 ### Barrons
 
 * Home (/homepage)
@@ -40,12 +42,14 @@ Other Dow Jones sites (WSJ, FNLondon) can also be selected by appending /Barrons
 
 ### WSJ
 
+* Homepage (/homepage)
 * Politics (/news/politics)
 * Magazine (/news/magazine)
 * Video (/video)
 
 ### FNLondon
 
+* Homepage (/homepage)
 * News (/news)
 * People (/people_)
 

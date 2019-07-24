@@ -1,18 +1,19 @@
 {
     "barrons": [
-        "penta",
         "homepage",
+        "penta",
         "market-data",
         "advisorcenter"
     ],
     "wsj": [
+        "homepage",
         "news/politics",
         "news/magazine",
         "video"
     ],
     "fnlondon": [
+        "homepage",
         "news",
         "people"
     ]
-
 }
