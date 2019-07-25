@@ -2,6 +2,7 @@
 const paths = require('./data/paths')
 const endpoints = require('./data/endpoints')
 const breakpoints = require('./data/breakpoints')
+const getDisplayName = require('./data/display-names').getDisplayName
 
 // External dependencies
 const fs = require('fs')
@@ -38,22 +39,6 @@ const s3 = new aws.S3(config)
 const formatDate = date => {
   return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
 }
-
-const getDisplayName = product => {
-  switch (product) {
-    case 'barrons':
-      return 'Barrons'
-    case 'wsj':
-      return 'WSJ'
-    case 'fnlondon':
-      return 'FNLondon'
-    default:
-      console.log('No display name set, assuming you want it the same.')
-  }
-  return product
-}
-
-module.exports.getDisplayName = getDisplayName
 
 // Sets variable from JSON data in S3 Bucket
 const getData = async (file, day, month, year, domainDisplayName) => {

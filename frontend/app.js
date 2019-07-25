@@ -2,20 +2,7 @@ import $ from 'jquery'
 import 'air-datepicker-en'
 import './../node_modules/air-datepicker-en/dist/css/datepicker.min.css'
 import paths from './../data/paths.json'
-
-const getDisplayName = product => {
-  switch (product) {
-    case 'barrons':
-      return 'Barrons'
-    case 'wsj':
-      return 'WSJ'
-    case 'fnlondon':
-      return 'FNLondon'
-    default:
-      console.log('No display name set, assuming you want it the same.')
-  }
-  return product
-}
+import { getDisplayName } from './../data/display-names'
 
 const getDate = () => {
   const dirtyDate = $('#archive').val()

@@ -53,3 +53,9 @@ Other Dow Jones sites (WSJ, FNLondon) can also be selected by appending /Barrons
 * News (/news)
 * People (/people_)
 
+## Adding Pages
+
+Just add an entry in paths.json. If you're adding a product, make sure it's whatever is between the www. and the .com. So, www.barrons.com just has barrons in the array name for it inside paths.json. 
+
+To display that product name with better capitalization, edit display-names.js. Please don't add spaces or slashes in there though, that will break the app!
+
