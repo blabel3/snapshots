@@ -72,6 +72,12 @@ $(document).ready(() => {
     input.id = `prod-${productName}`
     input.name = 'product'
     input.value = productName
+    input.onchange = () => {
+      const color = window.getComputedStyle(label).getPropertyValue('border-top-color')
+      $('body').css('background-color', color)
+      $('.download').css('background-color', color)
+      $('select').css('border-color', color)
+    }
 
     label.appendChild(input)
     label.appendChild(document.createTextNode(getDisplayName(productName)))
@@ -101,15 +107,4 @@ $(document).ready(() => {
   }).data('datepicker')
 
   datepicker.selectDate(new Date())
-
-  const products = $('input[name=product]')
-  console.log(products)
-  for (let i = 0; i < products.length; i++) {
-    products[i].onchange = function () {
-      const label = $('label')
-      const color = window.getComputedStyle(label[0]).getPropertyValue('border-top-color')
-      $('body').css('background-color', color)
-      $('.download').css('background-color', color)
-    }
-  }
 })
