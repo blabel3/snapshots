@@ -9,7 +9,6 @@ let zipfilename
 let screenshotfilename
 
 app.use(express.static('public')) // serves files in public.
-app.use('/assets', express.static(__dirname + '/assets'))
 
 // Servo required health check
 app.get('/_health', (req, res) => {
