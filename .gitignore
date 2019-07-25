@@ -3,8 +3,8 @@ node_modules
 jspm_packages
 
 # test runs for screenshot functionality
-*.png
-*.zip
+/*.png
+/*.zip
 
 # files built with webpack
 /public/main.js
