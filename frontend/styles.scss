@@ -42,14 +42,10 @@ h1 {
     flex-wrap: wrap;
 }
 
-#products > :last-child {
-    margin-right: 0px;
-}
-
 .product {
     padding: 10px 2px;
     text-align: center;
-    margin-right: 2%;
+    margin: 5px 5px;
     flex-grow: 1;
     border: 1px solid black;
     border-radius: 5px;
