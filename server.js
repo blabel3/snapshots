@@ -2,6 +2,7 @@
 
 const express = require('express')
 const { spawn } = require('child_process')
+const del = require('del')
 
 // Initilization
 const app = express()
@@ -28,15 +29,6 @@ app.get('/snap', (req, res) => {
   })
 
   res.status(200).send('<h1>Snapping, check the logs!</h1>')
-})
-
-app.get('/list', (req, res) => {
-  spawn('node', ['-e', 'require("./snapshot").checkFiles()'], {
-    detached: true,
-    stdio: 'inherit'
-  })
-
-  res.send('<p>Listing, yay?...</p>')
 })
 
 app.get('/today', (req, res) => {
@@ -104,6 +96,11 @@ app.get('/download/file/:file', (req, res) => {
 
 app.get('/download/zip/:zip', (req, res) => {
   res.download(`./${req.params.zip}`)
+})
+
+app.get('/cleanup', async (req, res) => {
+  const deleted = await del(['*.zip', '*.png'])
+  res.send(deleted)
 })
 
 // Binding to servo specified port
