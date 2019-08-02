@@ -116,7 +116,7 @@ const browser = async () => {
 
       for (let breakpointIndex = 0; breakpointIndex < numOfBreakpoints; breakpointIndex++) {
         // 4 breakpoints
-        if(pages[pageIndex] === 'homepage'){
+        if (pages[pageIndex] === 'homepage') {
           process.stdout.write(`Screenshotting ${domain}... @${breakpointNames[breakpointIndex]} `)
         } else {
           process.stdout.write(`Screenshotting ${domain}/${pages[pageIndex]}... @${breakpointNames[breakpointIndex]} `)
