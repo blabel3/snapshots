@@ -27,7 +27,7 @@
     "sass": "^1.22.7",
     "style-loader": "^0.23.1",
     "webpack": "^4.37.0",
-    "webpack-cli": "^3.3.6"
+    "webpack-cli": "^3.3.12"
   },
   "scripts": {
     "lint": "eslint *.js data/*.js test/*.js frontend/*.js",
